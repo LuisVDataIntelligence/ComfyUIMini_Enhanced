@@ -1,0 +1,7 @@
+{
+  "name": "comfyuimini",
+  "private": true,
+  "workspaces": [
+    "client"
+  ]
+}
