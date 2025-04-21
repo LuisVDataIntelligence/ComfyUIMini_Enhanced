@@ -3,5 +3,8 @@
   "private": true,
   "workspaces": [
     "client"
-  ]
+  ],
+  "scripts": {
+    "dev": "cd client && bun dev"
+  }
 }
