@@ -2,7 +2,11 @@
 import { ref } from 'vue';
 import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
-import { FaSave } from 'vue-icons-plus/fa';
+import { FaChevronDown, FaChevronUp, FaSave } from 'vue-icons-plus/fa';
+import useAppWorkflowsStore from '../../stores/appWorkflows';
+import router from '../../router';
+
+const appWorkflowsStore = useAppWorkflowsStore();
 
 const appWorkflow = ref<AppWorkflow>({
     title: 'New Workflow',
@@ -84,7 +88,24 @@ function generateDefaultInputsInfo(nodes: WorkflowNodes): AppWorkflowInputInfo[]
 }
 
 function handleSave() {
-    alert('Saving...');
+    appWorkflowsStore.addWorkflow(appWorkflow.value);
+    router.push('/');
+}
+
+function moveUp(index: number) {
+    const inputs = appWorkflow.value.inputs_info;
+
+    if (index > 0) {
+        [inputs[index - 1], inputs[index]] = [inputs[index], inputs[index - 1]];
+    }
+}
+
+function moveDown(index: number) {
+    const inputs = appWorkflow.value.inputs_info;
+
+    if (index < inputs.length - 1) {
+        [inputs[index + 1], inputs[index]] = [inputs[index], inputs[index + 1]];
+    }
 }
 </script>
 
@@ -118,23 +139,30 @@ function handleSave() {
                 placeholder="This workflow does..."></textarea>
 
             <span class="text-2xl font-bold">Inputs</span>
-            <div v-for="(value, key) in appWorkflow.inputs_info" :key="key">
-                <div class="bg-slate-700 rounded-xl text-white p-4 flex flex-col"
-                    :class="{ 'opacity-75': value.hidden }">
+            <div class="flex flex-col gap-2" role="list">
+                <div v-for="(value, key) in appWorkflow.inputs_info" :key="key"
+                    class="bg-slate-700 rounded-xl text-white flex flex-row" :class="{ 'opacity-75': value.hidden }"
+                    role="listitem">
 
-                    <span class="text-gray-300 italic mb-2">{{ value.input_name }}</span>
-                    <div class="flex flex-row gap-2">
-                        <input type="text" v-model="value.title"
-                            class="text-white bg-slate-600 p-2 rounded-lg ring-1 ring-slate-400 font-semibold w-full text-lg">
-                        <input :id="key + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
-                        <label :for="key + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full">
-                            <PiEyeSlash v-if="value.hidden" class="bg-slate-800" />
-                            <PiEye v-else class="bg-slate-600" />
-                        </label>
+                    <div class="flex flex-col grow p-3 pr-0">
+                        <span class="text-gray-300 italic mb-2">{{ value.input_name }}</span>
+                        <div class="flex flex-row gap-2">
+                            <input type="text" v-model="value.title"
+                                class="text-white bg-slate-600 p-2 rounded-lg ring-1 ring-slate-400 font-semibold w-full text-lg">
+                            <input :id="key + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
+                            <label :for="key + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full">
+                                <PiEyeSlash v-if="value.hidden" class="bg-slate-800" />
+                                <PiEye v-else class="bg-slate-600" />
+                            </label>
+                        </div>
+
+                        <input type="text" v-model="appWorkflow.nodes[value.node_id].inputs[value.input_name]"
+                            class="bg-slate-600 p-3 mt-2 rounded-lg">
                     </div>
-
-                    <input type="text" v-model="appWorkflow.nodes[value.node_id].inputs[value.input_name]"
-                        class="bg-slate-600 p-3 mt-2 rounded-lg">
+                    <div class="flex flex-col gap-2 ">
+                        <FaChevronUp class="h-1/2 p-3 box-content" @click="moveUp(key)" />
+                        <FaChevronDown class="h-1/2 p-3 box-content" @click="moveDown(key)" />
+                    </div>
                 </div>
             </div>
         </div>
