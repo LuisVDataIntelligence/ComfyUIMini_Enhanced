@@ -3,6 +3,7 @@ interface AppWorkflowInputInfo {
     input_name: string;
     title: string;
     hidden: boolean;
+    lastValue?: string | number | unknown;
 }
 
 interface AppWorkflow {
@@ -10,4 +11,5 @@ interface AppWorkflow {
     description: string;
     inputs_info: AppWorkflowInputInfo[];
     nodes: WorkflowNodes;
+    lastGeneratedImages?: string[];
 }

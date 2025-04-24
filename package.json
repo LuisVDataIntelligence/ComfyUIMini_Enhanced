@@ -5,7 +5,7 @@
     "client"
   ],
   "scripts": {
-    "dev": "cd client && bun dev"
+    "dev": "cd client && bun --env-file=../.env dev"
   },
   "dependencies": {
     "pinia-plugin-persistedstate": "^4.2.0"

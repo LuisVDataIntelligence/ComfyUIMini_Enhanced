@@ -110,7 +110,7 @@ function moveDown(index: number) {
 </script>
 
 <template>
-    <div class="size-full flex flex-col p-2 gap-2 overflow-y-auto">
+    <div class="size-full flex flex-col gap-2 overflow-y-auto">
         <RouterLink to="/" class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
             Back
         </RouterLink>

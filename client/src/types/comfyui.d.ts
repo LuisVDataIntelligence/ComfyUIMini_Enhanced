@@ -1,4 +1,4 @@
-type WorkflowNodes = Record<string, {
+type WorkflowNode = {
     _meta: {
         title: string;
     } & unknown;
@@ -7,4 +7,12 @@ type WorkflowNodes = Record<string, {
         string, // Name of input
         string | number | (string | number)[] | any // Default data for input
     >;
-} & unknown>;
+};
+
+type WorkflowNodes = Record<string, WorkflowNode & unknown>;
+
+type ObjectInfo = Record<string, {
+    input: {
+        required: any;
+    }
+}>;

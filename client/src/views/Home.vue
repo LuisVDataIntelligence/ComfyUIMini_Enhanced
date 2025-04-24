@@ -6,7 +6,7 @@ const appWorkflowsStore = useAppWorkflowsStore();
 </script>
 
 <template>
-    <div class="size-full flex flex-col p-2 ">
+    <div class="size-full flex flex-col">
         <span class="flex flex-row text-lg font-bold mb-2">
             ComfyUIMini
             <span class="w-full"></span>
