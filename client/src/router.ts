@@ -3,6 +3,7 @@ import MainLayout from "./layouts/MainLayout.vue";
 import Home from "./views/Home.vue";
 import Import from "./views/Import/Import.vue";
 import Workflow from "./views/Workflow/Workflow.vue";
+import Settings from "./views/Settings/Settings.vue";
 
 const routes = [
     {
@@ -23,6 +24,11 @@ const routes = [
                 path: 'workflow/:type/:index',
                 name: 'Workflow',
                 component: Workflow
+            },
+            {
+                path: 'settings',
+                name: 'Settings',
+                component: Settings
             }
         ]
     },
