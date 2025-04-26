@@ -2,10 +2,11 @@
 import { onBeforeMount, ref, toRaw } from 'vue';
 import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
-import { FaBars, FaChevronDown, FaChevronUp, FaSave, FaTrash } from 'vue-icons-plus/fa';
+import { FaBars, FaChevronDown, FaChevronUp, FaFileExport, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import formatTextForFile from '../../utils/formatTextForFile';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -37,7 +38,7 @@ onBeforeMount(() => {
         appWorkflow.value = structuredClone(toRaw(appWorkflowsStore.appWorkflows[parseInt(params.index as string)]));
     }
 
-    console.log("Opening: \n", toRaw(appWorkflow.value));
+    console.log("Opening: ", toRaw(appWorkflow.value));
 });
 
 async function handleFileUpload(event: Event) {
@@ -49,11 +50,18 @@ async function handleFileUpload(event: Event) {
         return;
     }
 
-    appWorkflow.value.nodes = validatedFile;
-    appWorkflow.value.inputs_info = generateDefaultInputsInfo(validatedFile);
+    if (validatedFile.hasOwnProperty('title') &&
+        validatedFile.hasOwnProperty('description') &&
+        validatedFile.hasOwnProperty('inputs_info') &&
+        validatedFile.hasOwnProperty('nodes')) {
+        appWorkflow.value = validatedFile as AppWorkflow;
+    } else {
+        appWorkflow.value.nodes = validatedFile as WorkflowNodes;
+        appWorkflow.value.inputs_info = generateDefaultInputsInfo(validatedFile as WorkflowNodes);
+    }
 }
 
-async function validateFile(files: FileList | null): Promise<WorkflowNodes | null> {
+async function validateFile(files: FileList | null): Promise<WorkflowNodes | AppWorkflow | null> {
     if (!files || files.length === 0) {
         alert('Please choose a file.');
         return null;
@@ -80,7 +88,7 @@ async function validateFile(files: FileList | null): Promise<WorkflowNodes | nul
         return null;
     }
 
-    // By here, we are 90% sure this is an api exported workflow, TODO: additional checks later
+    // By here, we are 70% sure this is an api exported workflow, TODO: additional checks later
     return parsedJson as WorkflowNodes;
 }
 
@@ -143,6 +151,24 @@ function handleDelete() {
     router.push('/');
 }
 
+function exportWorkflow() {
+    const workflowCopy = structuredClone(toRaw(appWorkflow.value));
+    workflowCopy.lastGeneratedImages = [];
+
+    const json = JSON.stringify(workflowCopy, null, 4);
+
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${formatTextForFile(workflowCopy.title)}.comfyminiworkflow.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    a.remove();
+}
+
 function moveUp(index: number) {
     const inputs = appWorkflow.value.inputs_info;
 
@@ -180,9 +206,15 @@ function moveDown(index: number) {
             Save
         </button>
 
+        <button v-if="appWorkflow.inputs_info.length > 0" @click="exportWorkflow"
+            class="bg-slate-800 p-3 rounded-xl text-lg font-bold flex flex-row items-center justify-center gap-2 cursor-pointer">
+            <FaFileExport class="size-5" />
+            Export as JSON
+        </button>
+
         <button v-if="editing" @click="handleDelete"
-            class="bg-red-900 p-3 rounded-xl text-xl font-bold flex flex-row items-center justify-center gap-2 cursor-pointer">
-            <FaTrash />
+            class="bg-red-900 p-3 rounded-xl text-lg font-bold flex flex-row items-center justify-center gap-2 cursor-pointer">
+            <FaTrash class="size-5" />
             Delete Workflow
         </button>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { FaRegEdit } from 'vue-icons-plus/fa';
+import { FaFileImport, FaHistory, FaRegEdit } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../stores/appWorkflows';
+import { LuSettings } from 'vue-icons-plus/lu';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -10,14 +11,15 @@ const appWorkflowsStore = useAppWorkflowsStore();
     <div class="size-full flex flex-col gap-2">
         <span class="flex flex-row text-lg font-bold">
             ComfyUIMini
-            <span class="w-full"></span>
+            <span class="w-full" role="separator"></span>
             v2.0.0
         </span>
         <RouterLink to="/import"
-            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
+            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
+            <FaFileImport class="size-5" />
             Import Workflow
         </RouterLink>
-        <div class="flex flex-col gap-2" role="list">
+        <div v-if="appWorkflowsStore.appWorkflows.length > 0" class="flex flex-col gap-2" role="list">
             <RouterLink v-for="(workflow, index) in appWorkflowsStore.appWorkflows" :to="`/workflow/local/${index}`"
                 class="bg-slate-700 p-4 rounded-xl cursor-pointer flex flex-row gap-2">
                 <div class="grow">
@@ -30,8 +32,15 @@ const appWorkflowsStore = useAppWorkflowsStore();
                 </RouterLink>
             </RouterLink>
         </div>
+        <span v-else></span>
+        <RouterLink to="/history"
+            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
+            <FaHistory class="size-5" />
+            History
+        </RouterLink>
         <RouterLink to="/settings"
-            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
+            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
+            <LuSettings class="size-5" />
             Settings
         </RouterLink>
     </div>
