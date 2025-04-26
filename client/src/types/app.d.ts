@@ -4,6 +4,9 @@ interface AppWorkflowInputInfo {
     title: string;
     hidden: boolean;
     lastValue?: string | number | unknown;
+    features?: {
+        increment_toggles?: boolean;
+    }
 }
 
 interface AppWorkflow {

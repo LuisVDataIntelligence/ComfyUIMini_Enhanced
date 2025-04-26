@@ -6,6 +6,7 @@ import { FaChevronDown, FaChevronUp, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import ContextMenu from '../../components/ContextMenu.vue';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -184,8 +185,16 @@ function moveDown(index: number) {
                         <div class="flex flex-row gap-2">
                             <input type="text" v-model="value.title"
                                 class="text-white bg-slate-600 p-2 rounded-lg ring-1 ring-slate-400 font-semibold w-full text-lg">
+                            <ContextMenu>
+                                <template #button="{ openMenu }">
+                                    <div @click="openMenu"
+                                        class="h-full aspect-square bg-slate-600 rounded-full flex items-center justify-center select-none text-lg cursor-pointer">
+                                        ☰
+                                    </div>
+                                </template>
+                            </ContextMenu>
                             <input :id="key + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
-                            <label :for="key + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full">
+                            <label :for="key + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full cursor-pointer">
                                 <PiEyeSlash v-if="value.hidden" class="bg-slate-800" />
                                 <PiEye v-else class="bg-slate-600" />
                             </label>
