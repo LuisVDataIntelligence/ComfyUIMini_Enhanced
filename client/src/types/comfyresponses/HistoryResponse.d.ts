@@ -1,17 +1,7 @@
 type HistoryResponse = Record<string, { // Prompt ID
-    prompt: [
-        1 | number, // Seen as 1
-        string, // Prompt ID, same as the prompt id above
-        WorkflowNodes, // Prompt
-        Record<unknown, unknown>, // Unknown, seen as empty object,
-        string[], // Output nodes?
-    ],
+    prompt: ResponsePrompt,
     outputs: Record<string, {
-        images: {
-            filename: string;
-            subfolder: string;
-            type: 'output' | string;
-        }[];
+        images: ComfyImageData[];
     }>,
     status: {
         status_str: string;

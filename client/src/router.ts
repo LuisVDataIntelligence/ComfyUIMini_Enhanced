@@ -4,6 +4,7 @@ import Home from "./views/Home.vue";
 import Import from "./views/Import/Import.vue";
 import Workflow from "./views/Workflow/Workflow.vue";
 import Settings from "./views/Settings/Settings.vue";
+import History from "./views/History/History.vue";
 
 const routes = [
     {
@@ -29,6 +30,11 @@ const routes = [
                 path: 'settings',
                 name: 'Settings',
                 component: Settings
+            },
+            {
+                path: 'history',
+                name: 'History',
+                component: History
             }
         ]
     },

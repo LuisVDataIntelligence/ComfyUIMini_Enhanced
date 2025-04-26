@@ -15,6 +15,9 @@ const useComfyStore = defineStore('comfyui', () => {
     const comfyuiWsUrl = useConfigStore().comfyuiWsUrl;
 
     const comfyObjectInfo = ref<ObjectInfo | null>(null);
+    const comfyQueue = ref<QueueResponse>({ queue_running: [], queue_pending: [] });
+    const comfyHistory = ref<HistoryResponse>({});
+
     const loading = ref(false);
 
     async function fetchComfyObjectInfo() {
@@ -94,6 +97,8 @@ const useComfyStore = defineStore('comfyui', () => {
                         }
                     });
 
+                    refreshQueue();
+
                     const response = await fetch(`${comfyuiUrl}/history/${promptId}`);
                     const history: HistoryResponse = await response.json();
 
@@ -145,11 +150,37 @@ const useComfyStore = defineStore('comfyui', () => {
         yield { type: 'finished', data: { images: finalImageUrls } };
     }
 
+    async function refreshQueue() {
+        const response = await fetch(`${comfyuiUrl}/queue`);
+        const queue: QueueResponse = await response.json();
+
+        comfyQueue.value = queue;
+    }
+
+    async function loadFullHistory() {
+        const response = await fetch(`${comfyuiUrl}/history`);
+        const history: HistoryResponse = await response.json();
+
+        comfyHistory.value = history;
+    }
+
+    async function stopGeneration() {
+        await fetch(`${comfyuiUrl}/interrupt`, {
+            method: 'POST',
+        });
+
+        refreshQueue();
+    }
+
     fetchComfyObjectInfo();
 
     return {
         comfyuiUrl,
         loading,
+        queue: comfyQueue,
+        history: comfyHistory,
+        loadFullHistory,
+        stopGeneration,
         fetchComfyObjectInfo,
         getInputInfo,
         generate
