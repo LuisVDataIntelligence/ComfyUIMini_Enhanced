@@ -2,11 +2,10 @@
 import { onBeforeMount, ref, toRaw } from 'vue';
 import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
-import { FaChevronDown, FaChevronUp, FaSave, FaTrash } from 'vue-icons-plus/fa';
+import { FaBars, FaChevronDown, FaChevronUp, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../router';
 import { useRoute } from 'vue-router';
-import ContextMenu from '../../components/ContextMenu.vue';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -20,11 +19,25 @@ const appWorkflow = ref<AppWorkflow>({
 const params = useRoute().params;
 const editing = ref(params.mode === 'edit');
 
+const openedExtraMenus = ref<Set<number>>(new Set());
+
+function toggleExtraMenu(index: number) {
+    if (openedExtraMenus.value.has(index)) {
+        openedExtraMenus.value.delete(index);
+    } else {
+        openedExtraMenus.value.add(index);
+    }
+
+    openedExtraMenus.value = new Set(openedExtraMenus.value);
+}
+
 onBeforeMount(() => {
     if (editing.value) {
         // Clone to prevent mutation before save
         appWorkflow.value = structuredClone(toRaw(appWorkflowsStore.appWorkflows[parseInt(params.index as string)]));
     }
+
+    console.log("Opening: \n", toRaw(appWorkflow.value));
 });
 
 async function handleFileUpload(event: Event) {
@@ -76,7 +89,6 @@ function generateDefaultInputsInfo(nodes: WorkflowNodes): AppWorkflowInputInfo[]
 
     for (const [nodeId, node] of Object.entries(nodes)) {
         for (const [inputName, input] of Object.entries(node.inputs)) {
-
             if (Array.isArray(input)) {
                 // Arrays mean that the value is taken from another node, and is therefore not user editable
                 continue;
@@ -87,12 +99,22 @@ function generateDefaultInputsInfo(nodes: WorkflowNodes): AppWorkflowInputInfo[]
                 continue;
             }
 
-            inputsInfo.push({
+            const inputInfoInitial: AppWorkflowInputInfo = {
                 node_id: nodeId,
                 input_name: inputName,
                 title: inputName,
                 hidden: false,
-            });
+            };
+
+            if (node.class_type === 'KSampler' && inputName === 'seed') {
+                inputInfoInitial.features = {
+                    increment_toggles: {
+                        mode: 'random'
+                    }
+                }
+            }
+
+            inputsInfo.push(inputInfoInitial);
         }
     }
 
@@ -176,25 +198,23 @@ function moveDown(index: number) {
 
             <span class="text-2xl font-bold">Inputs</span>
             <div class="flex flex-col gap-2" role="list">
-                <div v-for="(value, key) in appWorkflow.inputs_info" :key="key"
+                <div v-for="(value, index) in appWorkflow.inputs_info" :key="index"
                     class="bg-slate-700 rounded-xl text-white flex flex-row" :class="{ 'opacity-75': value.hidden }"
                     role="listitem">
 
                     <div class="flex flex-col grow p-3 pr-0">
                         <span class="text-gray-300 italic mb-2">{{ value.input_name }}</span>
-                        <div class="flex flex-row gap-2">
+                        <div class="flex flex-row gap-2 items-center">
                             <input type="text" v-model="value.title"
                                 class="text-white bg-slate-600 p-2 rounded-lg ring-1 ring-slate-400 font-semibold w-full text-lg">
-                            <ContextMenu>
-                                <template #button="{ openMenu }">
-                                    <div @click="openMenu"
-                                        class="h-full aspect-square bg-slate-600 rounded-full flex items-center justify-center select-none text-lg cursor-pointer">
-                                        ☰
-                                    </div>
-                                </template>
-                            </ContextMenu>
-                            <input :id="key + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
-                            <label :for="key + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full cursor-pointer">
+
+                            <button class="size-10 cursor-pointer rounded-full bg-slate-600"
+                                @click="toggleExtraMenu(index)">
+                                <FaBars class="box-content p-2" />
+                            </button>
+                            <input :id="index + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
+                            <label :for="index + '_is_hidden'"
+                                class="*:p-2 *:box-content *:rounded-full cursor-pointer">
                                 <PiEyeSlash v-if="value.hidden" class="bg-slate-800" />
                                 <PiEye v-else class="bg-slate-600" />
                             </label>
@@ -202,10 +222,22 @@ function moveDown(index: number) {
 
                         <input type="text" v-model="appWorkflow.nodes[value.node_id].inputs[value.input_name]"
                             class="bg-slate-600 p-3 mt-2 rounded-lg">
+
+                        <div v-if="openedExtraMenus.has(index)" class="w-full">
+                            <div class="bg-slate-600 mt-2 p-2 rounded-lg">
+                                <input :id="index + '_increment_toggles'" type="checkbox"
+                                    :checked="value.features?.increment_toggles ? true : false || false" @change="e => {
+                                        if (!value.features) value.features = {};
+                                        const isChecked = (e.target as HTMLInputElement).checked;
+                                        value.features.increment_toggles = isChecked ? { mode: 'random' } : undefined;
+                                    }">
+                                <label :for="index + '_increment_toggles'" class="ml-2">Random/Increment Toggle</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex flex-col gap-2 ">
-                        <FaChevronUp class="h-1/2 p-3 box-content" @click="moveUp(key)" />
-                        <FaChevronDown class="h-1/2 p-3 box-content" @click="moveDown(key)" />
+                        <FaChevronUp class="h-1/2 p-3 box-content" @click="moveUp(index)" />
+                        <FaChevronDown class="h-1/2 p-3 box-content" @click="moveDown(index)" />
                     </div>
                 </div>
             </div>

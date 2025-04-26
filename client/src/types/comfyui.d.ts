@@ -11,12 +11,6 @@ type WorkflowNode = {
 
 type WorkflowNodes = Record<string, WorkflowNode & unknown>;
 
-type ObjectInfo = Record<string, {
-    input: {
-        required: any;
-    }
-}>;
-
 type ResponsePrompt = [
     number, // Prompt number i.e. number of workflows ran since ComfyUI start
     string, // Prompt ID

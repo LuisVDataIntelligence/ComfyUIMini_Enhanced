@@ -34,9 +34,8 @@ defineExpose({
         </div>
         <div v-else class="w-full p-2 bg-slate-700 rounded-lg">
             <span class="text-gray-300">{{ input.title }}</span>
-            <InputField :inputInfo="comfyuiStore.getInputInfo(nodeClass, props.input.input_name)"
-                :defaultValue="node.inputs[props.input.input_name]" :lastValue="props.input.lastValue"
-                ref="inputField" />
+            <InputField :comfyInputInfo="comfyuiStore.getInputInfo(nodeClass, props.input.input_name)"
+                :defaultValue="node.inputs[props.input.input_name]" :appInputInfo="props.input" ref="inputField" />
         </div>
     </template>
 </template>

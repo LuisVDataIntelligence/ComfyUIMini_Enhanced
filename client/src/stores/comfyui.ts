@@ -3,7 +3,7 @@ import { ref } from "vue";
 import previewBlobToB64 from "../utils/generation/previewBlobToB64";
 import useConfigStore from "./config";
 
-async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfo | null>>) {
+async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
     const response = await fetch(`${comfyuiUrl}/api/object_info`);
     const data = await response.json();
 
@@ -14,7 +14,7 @@ const useComfyStore = defineStore('comfyui', () => {
     const comfyuiUrl = useConfigStore().comfyuiUrl;
     const comfyuiWsUrl = useConfigStore().comfyuiWsUrl;
 
-    const comfyObjectInfo = ref<ObjectInfo | null>(null);
+    const comfyObjectInfo = ref<ObjectInfoResponse | null>(null);
     const comfyQueue = ref<QueueResponse>({ queue_running: [], queue_pending: [] });
     const comfyHistory = ref<HistoryResponse>({});
 
