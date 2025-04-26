@@ -32,7 +32,8 @@ const appWorkflowsStore = useAppWorkflowsStore();
                 </RouterLink>
             </RouterLink>
         </div>
-        <span v-else></span>
+        <span v-else class="font-semibold bg-slate-700 p-4 rounded-xl">No workflows found. Import some using the button
+            above.</span>
         <RouterLink to="/history"
             class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
             <FaHistory class="size-5" />
