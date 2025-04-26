@@ -27,6 +27,11 @@ const routes = [
                 component: Workflow
             },
             {
+                path: 'workflow/:type/:index/:mode',
+                name: 'WorkflowEdit',
+                component: Import
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: Settings

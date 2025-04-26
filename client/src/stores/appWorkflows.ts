@@ -8,9 +8,19 @@ const useAppWorkflowsStore = defineStore('appWorkflow', () => {
         appWorkflows.value.push(workflow);
     }
 
+    function editWorkflow(index: number, workflow: AppWorkflow) {
+        appWorkflows.value[index] = workflow;
+    }
+
+    function deleteWorkflow(index: number) {
+        appWorkflows.value.splice(index, 1);
+    }
+
     return {
         appWorkflows,
-        addWorkflow
+        addWorkflow,
+        editWorkflow,
+        deleteWorkflow
     }
 }, { persist: true });
 

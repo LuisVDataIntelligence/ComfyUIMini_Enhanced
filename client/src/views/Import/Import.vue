@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeMount, ref, toRaw } from 'vue';
 import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
-import { FaChevronDown, FaChevronUp, FaSave } from 'vue-icons-plus/fa';
+import { FaChevronDown, FaChevronUp, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../router';
+import { useRoute } from 'vue-router';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -13,6 +14,16 @@ const appWorkflow = ref<AppWorkflow>({
     description: '',
     inputs_info: [],
     nodes: {},
+});
+
+const params = useRoute().params;
+const editing = ref(params.mode === 'edit');
+
+onBeforeMount(() => {
+    if (editing.value) {
+        // Clone to prevent mutation before save
+        appWorkflow.value = structuredClone(toRaw(appWorkflowsStore.appWorkflows[parseInt(params.index as string)]));
+    }
 });
 
 async function handleFileUpload(event: Event) {
@@ -88,7 +99,24 @@ function generateDefaultInputsInfo(nodes: WorkflowNodes): AppWorkflowInputInfo[]
 }
 
 function handleSave() {
-    appWorkflowsStore.addWorkflow(appWorkflow.value);
+    if (editing.value) {
+        appWorkflowsStore.editWorkflow(parseInt(params.index as string), appWorkflow.value);
+    } else {
+        appWorkflowsStore.addWorkflow(appWorkflow.value);
+    }
+    router.push('/');
+}
+
+function handleDelete() {
+    if (!editing.value) {
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete workflow '${appWorkflow.value.title}'?`)) {
+        return;
+    }
+
+    appWorkflowsStore.deleteWorkflow(parseInt(params.index as string));
     router.push('/');
 }
 
@@ -117,7 +145,8 @@ function moveDown(index: number) {
 
         <input id="file-input" type="file" class="hidden" accept=".json" @change="handleFileUpload" />
         <label for="file-input"
-            class="w-full flex flex-row items-center justify-center gap-2 p-4 bg-slate-700 text-white rounded-xl cursor-pointer">
+            class="w-full flex flex-row items-center justify-center gap-2 p-4 bg-slate-700 text-white rounded-xl cursor-pointer"
+            v-if="!editing">
             <PiFilePlus />
             Upload a workflow
         </label>
@@ -126,6 +155,12 @@ function moveDown(index: number) {
             class="bg-green-900 p-3 rounded-xl text-xl font-bold flex flex-row items-center justify-center gap-2 cursor-pointer">
             <FaSave />
             Save
+        </button>
+
+        <button v-if="editing" @click="handleDelete"
+            class="bg-red-900 p-3 rounded-xl text-xl font-bold flex flex-row items-center justify-center gap-2 cursor-pointer">
+            <FaTrash />
+            Delete Workflow
         </button>
 
         <div class="flex flex-col gap-2" v-if="appWorkflow.inputs_info.length > 0">
