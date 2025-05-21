@@ -2,9 +2,11 @@
   "name": "comfyuimini",
   "private": true,
   "workspaces": [
-    "client"
+    "client",
+    "server"
   ],
   "scripts": {
+    "start": "cd server && bun start",
     "dev": "cd client && bun --env-file=../.env dev"
   },
   "dependencies": {
