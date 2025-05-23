@@ -4,7 +4,11 @@ module.exports = {
         "./src/**/*.{html,js,ts,vue}",
     ],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                nebula: ['NebulaSans', 'sans-serif']
+            }
+        },
     },
     plugins: [],
 };

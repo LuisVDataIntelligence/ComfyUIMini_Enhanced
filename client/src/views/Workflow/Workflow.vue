@@ -86,8 +86,12 @@ async function stopGeneration() {
                 :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
         </div>
         <div class="flex flex-col gap-2">
-            <div class="w-full h-8 bg-slate-900 rounded-xl">
-                <div class="h-full bg-blue-700 rounded-xl" :style="{ width: progressPercent + '%' }"></div>
+            <div class="relative w-full h-8 bg-slate-900 rounded-lg ring-1 ring-white/50 ring-inset">
+                <div class="h-full bg-blue-700 rounded-lg transition-all duration-100"
+                    :style="{ width: progressPercent + '%' }"></div>
+                <span class="absolute top-0 left-0 text-2xl h-8 pl-2 items-center justify-center flex font-semibold">{{
+                    Math.floor(progressPercent)
+                }}%</span>
             </div>
             <div v-if="displayImageUrls.length === 0"
                 class="bg-gradient-to-br from-slate-700 to-slate-800 w-full aspect-square"></div>

@@ -1,7 +1,8 @@
 @import "tailwindcss";
+@import './fonts.css';
 
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: 'NebulaSans', system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 

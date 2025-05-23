@@ -21,14 +21,14 @@ const appWorkflowsStore = useAppWorkflowsStore();
         </RouterLink>
         <div v-if="appWorkflowsStore.appWorkflows.length > 0" class="flex flex-col gap-2" role="list">
             <RouterLink v-for="(workflow, index) in appWorkflowsStore.appWorkflows" :to="`/workflow/local/${index}`"
-                class="bg-slate-700 p-4 rounded-xl cursor-pointer flex flex-row gap-2">
-                <div class="grow">
+                class="bg-slate-700 rounded-xl cursor-pointer flex flex-row gap-2">
+                <div class="grow p-4">
                     <span class="text-lg font-bold">{{ workflow.title }}</span>
                     <p class="text-gray-300 text-sm">{{ workflow.description }}</p>
                 </div>
                 <RouterLink :to="`/workflow/local/${index}/edit`"
-                    class="min-h-12 h-full aspect-square flex items-center justify-center">
-                    <FaRegEdit class="size-8 " />
+                    class="min-h-12 h-full aspect-square flex items-center justify-center bg-slate-500 rounded-xl">
+                    <FaRegEdit class="size-8 translate-x-1" />
                 </RouterLink>
             </RouterLink>
         </div>
