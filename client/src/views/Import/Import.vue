@@ -2,11 +2,12 @@
 import { onBeforeMount, ref, toRaw } from 'vue';
 import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
-import { FaBars, FaChevronDown, FaChevronUp, FaFileExport, FaSave, FaTrash } from 'vue-icons-plus/fa';
+import { FaBars, FaFileExport, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import formatTextForFile from '../../utils/formatTextForFile';
+import { VueDraggableNext } from 'vue-draggable-next';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
@@ -168,29 +169,14 @@ function exportWorkflow() {
     URL.revokeObjectURL(url);
     a.remove();
 }
-
-function moveUp(index: number) {
-    const inputs = appWorkflow.value.inputs_info;
-
-    if (index > 0) {
-        [inputs[index - 1], inputs[index]] = [inputs[index], inputs[index - 1]];
-    }
-}
-
-function moveDown(index: number) {
-    const inputs = appWorkflow.value.inputs_info;
-
-    if (index < inputs.length - 1) {
-        [inputs[index + 1], inputs[index]] = [inputs[index], inputs[index + 1]];
-    }
-}
 </script>
 
 <template>
     <div class="size-full flex flex-col gap-2 overflow-y-auto">
-        <RouterLink to="/" class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
+        <div @click="router.back()"
+            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
             Back
-        </RouterLink>
+        </div>
 
         <input id="file-input" type="file" class="hidden" accept=".json" @change="handleFileUpload" />
         <label for="file-input"
@@ -229,12 +215,11 @@ function moveDown(index: number) {
                 placeholder="This workflow does..."></textarea>
 
             <span class="text-2xl font-bold">Inputs</span>
-            <div class="flex flex-col gap-2" role="list">
-                <div v-for="(value, index) in appWorkflow.inputs_info" :key="index"
-                    class="bg-slate-700 rounded-xl text-white flex flex-row" :class="{ 'opacity-75': value.hidden }"
-                    role="listitem">
+            <VueDraggableNext v-model="appWorkflow.inputs_info" class="flex flex-col gap-2" delay="300">
+                <div v-for="(value, index) in appWorkflow.inputs_info" :key="`${value.node_id}${value.input_name}`"
+                    class="" :class="{ 'opacity-75': value.hidden }" role="listitem">
 
-                    <div class="flex flex-col grow p-3 pr-0">
+                    <div class="flex flex-col grow p-3 bg-slate-700 rounded-xl text-white input-draggable-content">
                         <span class="text-gray-300 italic mb-2">{{ value.input_name }}</span>
                         <div class="flex flex-row gap-2 items-center">
                             <input type="text" v-model="value.title"
@@ -263,16 +248,20 @@ function moveDown(index: number) {
                                         const isChecked = (e.target as HTMLInputElement).checked;
                                         value.features.increment_toggles = isChecked ? { mode: 'random' } : undefined;
                                     }">
-                                <label :for="index + '_increment_toggles'" class="ml-2">Random/Increment Toggle</label>
+                                <label :for="index + '_increment_toggles'" class="ml-2">Random/Increment
+                                    Toggle</label>
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2 ">
-                        <FaChevronUp class="h-1/2 p-3 box-content" @click="moveUp(index)" />
-                        <FaChevronDown class="h-1/2 p-3 box-content" @click="moveDown(index)" />
-                    </div>
                 </div>
-            </div>
+            </VueDraggableNext>
         </div>
     </div>
 </template>
+
+<style>
+.sortable-chosen .input-draggable-content {
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+</style>

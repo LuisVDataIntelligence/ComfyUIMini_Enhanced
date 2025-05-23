@@ -5,7 +5,7 @@ import router from '../../router';
 import { useRoute } from 'vue-router';
 import WorkflowInput from './components/WorkflowInput.vue';
 import useComfyStore from '../../stores/comfyui';
-import { FaHistory, FaPlay, FaStop } from 'vue-icons-plus/fa';
+import { FaEdit, FaHistory, FaPlay, FaStop } from 'vue-icons-plus/fa';
 
 const comfyuiStore = useComfyStore();
 const appWorkflowsStore = useAppWorkflowsStore();
@@ -77,13 +77,30 @@ async function stopGeneration() {
 </script>
 
 <template>
-    <div class="size-full flex flex-col gap-2 overflow-y-auto">
+    <div v-if="!comfyuiStore.loading && !comfyuiStore.connected"
+        class="absolute top-0 left-0 size-full flex items-center justify-center">
+        <div class="max-w-[90vw] min-w-96 w-full bg-slate-800 p-4 rounded-lg flex flex-col gap-2">
+            <span class="font-semibold text-xl">Could not connect to ComfyUI</span>
+            <p>Please ensure ComfyUI is setup correctly by enabling CORS for this URL or ensure that the URL entered in
+                app settings is correct.</p>
+            <div class="flex flex-row justify-between">
+                <RouterLink to="/settings" class="bg-slate-600 p-2 pointer-coarse:p-4 rounded-md max-w-fit">Settings
+                </RouterLink>
+                <button class="bg-slate-700 p-2 pointer-coarse:p-4 rounded-md max-w-fit cursor-pointer"
+                    @click="router.back()">Back</button>
+            </div>
+        </div>
+    </div>
+    <div v-else class="size-full flex flex-col gap-2 overflow-y-auto">
         <RouterLink to="/" class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
             Back
         </RouterLink>
         <div class="flex flex-col gap-2">
-            <WorkflowInput v-for="(input, index) in openedWorkflow.inputs_info" :key="index" :input="input"
-                :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
+            <div v-for="input in openedWorkflow.inputs_info.filter(input => !input.hidden)"
+                :key="`${input.node_id}${input.input_name}`">
+                <WorkflowInput class="input-draggable-content" :input="input"
+                    :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
+            </div>
         </div>
         <div class="flex flex-col gap-2">
             <div class="relative w-full h-8 bg-slate-900 rounded-lg ring-1 ring-white/50 ring-inset">
@@ -91,7 +108,7 @@ async function stopGeneration() {
                     :style="{ width: progressPercent + '%' }"></div>
                 <span class="absolute top-0 left-0 text-2xl h-8 pl-2 items-center justify-center flex font-semibold">{{
                     Math.floor(progressPercent)
-                }}%</span>
+                    }}%</span>
             </div>
             <div v-if="displayImageUrls.length === 0"
                 class="bg-gradient-to-br from-slate-700 to-slate-800 w-full aspect-square"></div>
@@ -105,6 +122,11 @@ async function stopGeneration() {
                 class="bg-slate-800 p-4 rounded-xl text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
                 <FaHistory class="size-5" />
                 View History
+            </RouterLink>
+        </div>
+        <div class="size-14 fixed bg-slate-950 opacity-85 bottom-0 left-0 m-2 rounded-full shadow-xs shadow-black">
+            <RouterLink :to="router.currentRoute.value.fullPath + '/edit'" class="size-full rounded-full">
+                <FaEdit class="size-full p-4 pr-3" />
             </RouterLink>
         </div>
         <div class="size-14 fixed bottom-0 right-22 m-2 rounded-full shadow-xs shadow-black">

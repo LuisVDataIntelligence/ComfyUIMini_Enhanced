@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import previewBlobToB64 from "../utils/generation/previewBlobToB64";
 import useConfigStore from "./config";
+import { tryCatch } from "../utils/tryCatch";
 
 async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
     const response = await fetch(`${comfyuiUrl}/api/object_info`);
@@ -19,14 +20,21 @@ const useComfyStore = defineStore('comfyui', () => {
     const comfyHistory = ref<HistoryResponse>({});
 
     const loading = ref(false);
+    const connected = ref(false);
 
     async function fetchComfyObjectInfo() {
         if (comfyObjectInfo.value || loading.value) return;
-
         loading.value = true;
 
-        await initComfyData(comfyuiUrl, comfyObjectInfo);
+        const { error } = await tryCatch(initComfyData(comfyuiUrl, comfyObjectInfo));
+
         loading.value = false;
+        if (error) {
+            connected.value = false
+        } else {
+            connected.value = true;
+        }
+
     }
 
     function getInputInfo(nodeClass: string, inputName: string) {
@@ -183,7 +191,8 @@ const useComfyStore = defineStore('comfyui', () => {
         stopGeneration,
         fetchComfyObjectInfo,
         getInputInfo,
-        generate
+        generate,
+        connected
     };
 });
 
