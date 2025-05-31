@@ -27,7 +27,7 @@ const appWorkflowsStore = useAppWorkflowsStore();
                     <p class="text-gray-300 text-sm">{{ workflow.description }}</p>
                 </div>
                 <RouterLink :to="`/workflow/local/${index}/edit`"
-                    class="min-h-12 h-full aspect-square flex items-center justify-center bg-slate-500 rounded-xl">
+                    class="min-h-12 h-full aspect-square flex items-center justify-center bg-slate-800 rounded-r-xl">
                     <FaRegEdit class="size-8 translate-x-1" />
                 </RouterLink>
             </RouterLink>
