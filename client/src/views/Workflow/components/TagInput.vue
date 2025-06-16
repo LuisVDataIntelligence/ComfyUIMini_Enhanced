@@ -9,10 +9,27 @@ const props = defineProps<{
     modelValue: string;
 }>();
 
+const splitTags = computed({
+    get: () => {
+        let value = props.modelValue.trim();
+        // Remove trailing comma or comma + space
+        value = value.replace(/(, ?)+$/, '');
+        const list = value.split(',').map(item => item.trim());
+
+        return list.length === 1 && list[0] === "" ? [] : list;
+    },
+    set: (newTags) => {
+        emit('update:modelValue', newTags.join(', ') + (newTags.length ? ', ' : ''));
+    }
+});
+
+const emit = defineEmits(['update:modelValue'])
+
+const updateSplitTags = (newTags: string[]) => emit('update:modelValue', newTags.join(', ') + (newTags.length ? ', ' : ''));
 
 const tagInputElem = ref<HTMLInputElement | null>(null);
 
-const emit = defineEmits(['update:modelValue'])
+const editingIndex = ref(-1);
 
 function handleSubmit() {
     const newValue = tagInputElem.value?.value.trim() || '';
@@ -25,7 +42,8 @@ function handleSubmit() {
         const tags = splitTags.value.slice();
         tags[editingIndex.value] = newValue;
         editingIndex.value = -1;
-        emit('update:modelValue', tags.join(', ') + (tags.length ? ', ' : ''));
+
+        updateSplitTags(tags);
     } else {
         emit('update:modelValue', `${props.modelValue}${newValue}, `);
     }
@@ -40,17 +58,6 @@ function handleBlur() {
     }
 }
 
-const splitTags = computed(() => {
-    let value = props.modelValue.trim();
-    // Remove trailing comma or comma + space
-    value = value.replace(/(, ?)+$/, '');
-    const list = value.split(',').map(item => item.trim());
-    console.log(list);
-
-    return list.length === 1 && list[0] === "" ? [] : list;
-});
-
-const editingIndex = ref(-1);
 
 function editTag(tag: string, index: number) {
     tagInputElem.value!.value = tag;
@@ -63,7 +70,8 @@ function editTag(tag: string, index: number) {
 function removeItem(index: number) {
     const tags = splitTags.value.slice();
     tags.splice(index, 1);
-    updateValueWithTags(tags);
+
+    updateSplitTags(tags);
 
     if (editingIndex.value === index) {
         editingIndex.value = -1;
@@ -89,11 +97,7 @@ function increaseWeight(index: number) {
         tags[index] = `(${tag}:1.1)`;
     }
 
-    updateValueWithTags(tags);
-}
-
-function updateValueWithTags(newTags: string[]) {
-    emit('update:modelValue', newTags.join(', ') + (newTags.length ? ', ' : ''));
+    updateSplitTags(tags);
 }
 
 function decreaseWeight(index: number) {
@@ -116,7 +120,7 @@ function decreaseWeight(index: number) {
         tags[index] = `(${tag}:0.9)`;
     }
 
-    updateValueWithTags(tags);
+    updateSplitTags(tags);
 }
 
 function getTagWeightClass(tag: string) {
@@ -222,6 +226,5 @@ function getTagWeight(tag: string) {
                 <FaPlus />
             </button>
         </form>
-        <span>{{ modelValue }}</span>
     </div>
 </template>
