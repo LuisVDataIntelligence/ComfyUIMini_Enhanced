@@ -1,8 +1,0 @@
-node_modules/
-
-workflows/*
-!/workflows/converted_workflows_here
-!/workflows/default_comfyui_workflow.json
-
-/config/default.json
-dist/
