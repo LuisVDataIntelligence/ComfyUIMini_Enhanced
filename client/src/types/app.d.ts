@@ -4,11 +4,14 @@ interface AppWorkflowInputInfo {
     title: string;
     hidden: boolean;
     lastValue?: string | number | unknown;
-    features?: {
-        increment_toggles?: {
-            mode: 'random' | 'increment' | 'fixed';
-        };
-    }
+    features?: AppWorkflowInputFeatures
+}
+
+interface AppWorkflowInputFeatures {
+    increment_toggles?: {
+        mode: 'random' | 'increment' | 'fixed';
+    },
+    tag_input?: boolean,
 }
 
 interface AppWorkflow {

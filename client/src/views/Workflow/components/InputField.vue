@@ -4,6 +4,7 @@ import randomNumInRange from '../../../utils/randomNumInRange';
 import { FaPlus } from 'vue-icons-plus/fa';
 import { nanoid } from 'nanoid';
 import IncrementToggles from './IncrementToggles.vue';
+import TagInput from './TagInput.vue';
 
 const props = defineProps<{
     comfyInputInfo: any;
@@ -58,8 +59,10 @@ const showExtraMenu = ref(false);
             <input type="text" v-if="!comfyInputInfo[1].multiline" v-model="inputValue"
                 :title="comfyInputInfo[1].tooltip ?? undefined" />
 
-            <textarea v-else :title="comfyInputInfo[1].tooltip ?? undefined"
+            <textarea v-else-if="!appInputInfo.features?.tag_input" :title="comfyInputInfo[1].tooltip ?? undefined"
                 v-model="inputValue">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>
+
+            <TagInput v-else v-model="inputValue" :default="defaultValue ?? comfyInputInfo[1].default ?? ''"></TagInput>
         </template>
 
         <select v-else :title="comfyInputInfo[1].tooltip ?? undefined" v-model="inputValue">

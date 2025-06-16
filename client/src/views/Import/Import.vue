@@ -242,14 +242,26 @@ function exportWorkflow() {
 
                         <div v-if="openedExtraMenus.has(index)" class="w-full">
                             <div class="bg-slate-600 mt-2 p-2 rounded-lg">
-                                <input :id="index + '_increment_toggles'" type="checkbox"
-                                    :checked="value.features?.increment_toggles ? true : false || false" @change="e => {
-                                        if (!value.features) value.features = {};
-                                        const isChecked = (e.target as HTMLInputElement).checked;
-                                        value.features.increment_toggles = isChecked ? { mode: 'random' } : undefined;
-                                    }">
-                                <label :for="index + '_increment_toggles'" class="ml-2">Random/Increment
-                                    Toggle</label>
+                                <div>
+                                    <input :id="index + '_increment_toggles'" type="checkbox"
+                                        :checked="value.features?.increment_toggles ? true : false || false" @change="e => {
+                                            if (!value.features) value.features = {};
+                                            const isChecked = (e.target as HTMLInputElement).checked;
+                                            value.features.increment_toggles = isChecked ? { mode: 'random' } : undefined;
+                                        }">
+                                    <label :for="index + '_increment_toggles'" class="ml-2">Random/Increment
+                                        Toggle</label>
+                                </div>
+
+                                <div>
+                                    <input :id="index + '_tag_input'" type="checkbox"
+                                        :checked="value.features?.tag_input ? true : false || false" @change="e => {
+                                            if (!value.features) value.features = {};
+                                            const isChecked = (e.target as HTMLInputElement).checked;
+                                            value.features.tag_input = isChecked;
+                                        }">
+                                    <label :for="index + '_tag_input'" class="ml-2">Tag Input</label>
+                                </div>
                             </div>
                         </div>
                     </div>

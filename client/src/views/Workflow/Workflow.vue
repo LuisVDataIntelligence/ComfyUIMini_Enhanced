@@ -98,8 +98,7 @@ async function stopGeneration() {
         <div class="flex flex-col gap-2">
             <div v-for="input in openedWorkflow.inputs_info.filter(input => !input.hidden)"
                 :key="`${input.node_id}${input.input_name}`">
-                <WorkflowInput class="input-draggable-content" :input="input"
-                    :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
+                <WorkflowInput :input="input" :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
             </div>
         </div>
         <div class="flex flex-col gap-2">
