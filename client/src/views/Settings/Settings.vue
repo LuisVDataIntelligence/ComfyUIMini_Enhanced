@@ -10,14 +10,17 @@ const configStore = useConfigStore();
 
 const clonedConfig = storeToRefs(configStore);
 
-function handleSave() {
+async function handleSave() {
     configStore.$patch({
         baseComfyuiUrl: clonedConfig.baseComfyuiUrl.value,
         comfyuiUseSecure: clonedConfig.comfyuiUseSecure.value,
         comfyuiUseCustomUrls: clonedConfig.comfyuiUseCustomUrls.value,
         comfyuiUrl: clonedConfig.comfyuiUrl.value,
         comfyuiWsUrl: clonedConfig.comfyuiWsUrl.value,
+        animationsEnabled: clonedConfig.animationsEnabled.value,
     });
+
+    location.reload();
 }
 
 watch(clonedConfig.baseComfyuiUrl, (newVal) => {
@@ -64,6 +67,8 @@ watch(clonedConfig.comfyuiUseSecure, (secure) => {
                 <TextSetting label="ComfyUI URL" :disabled="!clonedConfig.comfyuiUseCustomUrls.value" v-model="clonedConfig.comfyuiUrl.value" />
                 <TextSetting label="ComfyUI Websocket URL" :disabled="!clonedConfig.comfyuiUseCustomUrls.value" v-model="clonedConfig.comfyuiWsUrl.value" />
             </div>
+            <h2 class="text-2xl font-semibold">Animations</h2>
+             <CheckboxSetting label="UI Animations" v-model="clonedConfig.animationsEnabled.value" />
         </div>
     </div>
 </template>

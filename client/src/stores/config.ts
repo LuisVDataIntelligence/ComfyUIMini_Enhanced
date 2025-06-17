@@ -8,10 +8,7 @@ const useConfigStore = defineStore('config', () => {
     const comfyuiUseSecure = ref<boolean>(false);
     const comfyuiUseCustomUrls = ref<boolean>(false);
 
-    function setComfyUrl(url: string, secure?: boolean) {
-        comfyuiUrl.value = `http${secure ? 's': ''}://${url}`;
-        comfyuiWsUrl.value = `ws${secure ? 's': ''}://${url}/ws`
-    }
+    const animationsEnabled = ref(true);
 
     return {
         comfyuiUrl,
@@ -19,7 +16,7 @@ const useConfigStore = defineStore('config', () => {
         baseComfyuiUrl,
         comfyuiUseSecure,
         comfyuiUseCustomUrls,
-        setComfyUrl,
+        animationsEnabled
     };
 }, {
     persist: true,

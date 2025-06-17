@@ -2,8 +2,11 @@
 import { computed, ref } from 'vue';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { AiOutlineClose } from 'vue-icons-plus/ai';
-import { FaPlus } from 'vue-icons-plus/fa';
+import { FaPlus, FaTrash } from 'vue-icons-plus/fa';
 import { TbArrowBigDownFilled, TbArrowBigUpFilled } from 'vue-icons-plus/tb';
+import useConfigStore from '../../../stores/config';
+
+const configStore = useConfigStore();
 
 const props = defineProps<{
     modelValue: string;
@@ -67,6 +70,8 @@ function editTag(tag: string, index: number) {
     tagInputElem.value?.select();
 }
 
+const itemRecentlyRemoved = ref(false);
+
 function removeItem(index: number) {
     const tags = splitTags.value.slice();
     tags.splice(index, 1);
@@ -76,6 +81,15 @@ function removeItem(index: number) {
     if (editingIndex.value === index) {
         editingIndex.value = -1;
     }
+
+    if (!configStore.animationsEnabled) return;
+
+    setTimeout(() => {
+        itemRecentlyRemoved.value = true;
+        setTimeout(() => {
+            itemRecentlyRemoved.value = false;
+        }, 100);
+    }, 50); // Animation
 }
 
 function increaseWeight(index: number) {
@@ -177,50 +191,69 @@ function getTagWeight(tag: string) {
     }
 }
 
+function clearTags() {
+    if (confirm('Are you sure you want to clear tags for this field?')) {
+        splitTags.value = []
+    }
+}
+
 </script>
 
 <template>
     <div class="flex flex-col">
-        <VueDraggableNext v-if="splitTags.length > 0" v-model="splitTags" delay="300"
-            class="flex flex-row flex-wrap gap-1">
-            <div v-for="(tag, index) of splitTags" :key="index">
-                <div class="bg-slate-800 p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150"
-                    :class="[{
-                        'brightness-150': index === editingIndex,
-                    }]" :style="{
-                        'box-shadow': getTagWeightClass(tag),
-                        'opacity': getTagOpacity(tag)
-                    }">
-                    <div class="flex flex-row gap-1">
-                        <button @click="increaseWeight(index)"
-                            class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-amber-300 transition-all duration-150">
-                            <TbArrowBigUpFilled class="p-0.5" />
-                        </button>
-                        <button @click="decreaseWeight(index)"
-                            class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-blue-300 transition-all duration-150">
-                            <TbArrowBigDownFilled class="p-0.5" />
-                        </button>
-                    </div>
-                    <span class="flex flex-row items-center justify-center gap-1 ml-1">
-                        <span @dblclick="editTag(tag, index)">
-                            {{ getRawTag(tag) }}
+        <VueDraggableNext 
+            v-if="splitTags.length > 0" 
+            v-model="splitTags" 
+            tag="ul" 
+            delay="300"
+            class="flex flex-row flex-wrap gap-1"
+        >
+            <transition-group name="tag-list" tag="ul" class="contents">
+                <li v-for="(tag, index) in splitTags" :key="index">
+                    <div class="bg-slate-800 p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150"
+                        :class="{ 
+                            'brightness-150': index === editingIndex,
+                            'scale-105': itemRecentlyRemoved && configStore.animationsEnabled
+                        }" 
+                        :style="{
+                            'box-shadow': getTagWeightClass(tag),
+                            opacity: getTagOpacity(tag),
+                        }">
+                        <div class="flex flex-row gap-1">
+                            <button @click="increaseWeight(index)"
+                                class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-amber-300 transition-all duration-150">
+                                <TbArrowBigUpFilled class="p-0.5" />
+                            </button>
+                            <button @click="decreaseWeight(index)"
+                                class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-blue-300 transition-all duration-150">
+                                <TbArrowBigDownFilled class="p-0.5" />
+                            </button>
+                        </div>
+                        <span class="flex flex-row items-center justify-center gap-1 ml-1">
+                            <span @dblclick="editTag(tag, index)">
+                                {{ getRawTag(tag) }}
+                            </span>
+                            <span v-if="getTagWeight(tag)" class="bg-slate-900 rounded-md p-1 text-gray-300">
+                                {{ getTagWeight(tag) }}
+                            </span>
                         </span>
-                        <span v-if="getTagWeight(tag)" class="bg-slate-900 rounded-md p-1 text-gray-300">
-                            {{ getTagWeight(tag) }}
-                        </span>
-                    </span>
-                    <div @click.capture="removeItem(index)" class="cursor-pointer text-red-400 aspect-square p-1">
-                        <AiOutlineClose />
+                        <div @click.capture="removeItem(index)" class="cursor-pointer text-red-400 aspect-square p-1">
+                            <AiOutlineClose />
+                        </div>
                     </div>
-                </div>
-            </div>
+                </li>
+            </transition-group>
         </VueDraggableNext>
+
         <div v-else>
             Enter a keyword and press <kbd class="bg-slate-800 px-1 rounded-sm">+</kbd> get started.
         </div>
         <form @submit.prevent="handleSubmit" class="flex flex-row gap-2 mt-1">
-            <input type="text" ref="tagInputElem" class="bg-slate-700 p-2 rounded-lg w-full" placeholder="Keyword..."
-                @blur="handleBlur">
+            <button type="button" @click="clearTags"
+                class="bg-slate-800 text-red-300 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
+                <FaTrash class="p-0.5" />
+            </button><input type="text" ref="tagInputElem" class="bg-slate-700 p-2 rounded-lg w-full"
+                placeholder="Keyword..." @blur="handleBlur">
             <button type="submit"
                 class="bg-slate-800 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaPlus />
