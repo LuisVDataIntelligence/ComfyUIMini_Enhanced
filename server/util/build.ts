@@ -2,6 +2,8 @@ import { existsSync } from 'fs';
 import logger from './logger';
 
 export async function ensureBuilt(buildPath: string, forceBuild: boolean) {
+    logger.info('Server Startup', 'Checking build status...');
+    
     if (existsSync(buildPath) && !forceBuild) {
         logger.info('Build Check', 'Found build directory, skipping build...');
     } else {
