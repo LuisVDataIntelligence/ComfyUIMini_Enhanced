@@ -1,15 +1,12 @@
 {
   "name": "comfyuimini",
   "private": true,
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "scripts": {
     "start": "cd server && bun start",
     "dev": "cd client && bun --env-file=../.env dev"
   },
-  "dependencies": {
-    "pinia-plugin-persistedstate": "^4.2.0"
-  }
+  "workspaces": [
+    "client",
+    "server"
+  ]
 }

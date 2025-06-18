@@ -1,56 +1,28 @@
 import { serve } from 'bun';
-import { existsSync } from 'fs';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
-import logger from './logger';
-import { parseArgs } from 'util';
+import logger from './util/logger';
+import { handleCliArgs } from './util/cli';
+import { ensureBuilt } from './util/build';
 
-const buildPath = './build';
-
-function getArgs() {
-    const { values } = parseArgs({
-        args: Bun.argv,
-        options: {
-            'force-build': {
-                type: 'boolean',
-                default: false
-            }
-        },
-        allowPositionals: true
-    });
-
-    return values;
-}
-
-async function ensureBuilt() {
-    if (existsSync(buildPath) && !getArgs()['force-build']) {
-        logger.info('Build Check', 'Found build directory, skipping build...');
-    } else {
-        logger.info('Build Check', 'Building client...');
-        const process = Bun.spawn(['bun', 'run', 'build'], {
-            cwd: '../client'
-        });
-
-        await process.exited;
-    }
-}
+const cliArgs = handleCliArgs();
 
 function startServer() {
     const app = new Hono();
 
-    app.use('/assets/*', serveStatic({ root: buildPath }))
-    app.use('/*.js', serveStatic({ root: buildPath }))
-    app.use('/*.css', serveStatic({ root: buildPath }))
-    app.use('/*.ico', serveStatic({ root: buildPath }))
-    app.use('/*.png', serveStatic({ root: buildPath }))
+    app.use('/assets/*', serveStatic({ root: cliArgs.buildPath }))
+    app.use('/*.js', serveStatic({ root: cliArgs.buildPath }))
+    app.use('/*.css', serveStatic({ root: cliArgs.buildPath }))
+    app.use('/*.ico', serveStatic({ root: cliArgs.buildPath }))
+    app.use('/*.png', serveStatic({ root: cliArgs.buildPath }))
 
-    app.use('*', serveStatic({ root: buildPath, path: './index.html' }))
+    app.use('*', serveStatic({ root: cliArgs.buildPath, path: './index.html' }))
 
     logger.info('Server Startup', 'Starting server...');
     const server = serve({
-        port: 1811,
+        port: cliArgs.port,
         fetch: app.fetch,
-        hostname: '0.0.0.0',
+        hostname: cliArgs.host,
         development: false,
     });
 
@@ -59,5 +31,5 @@ function startServer() {
     logger.info('Server Startup', '----------------------------------');
 }
 
-await ensureBuilt();
+await ensureBuilt(cliArgs.buildPath, cliArgs.forceBuild);
 startServer();
