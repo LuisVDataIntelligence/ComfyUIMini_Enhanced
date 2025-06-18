@@ -25,6 +25,10 @@ async function handleSave() {
 
 watch(clonedConfig.baseComfyuiUrl, (newVal) => {
     if (clonedConfig.comfyuiUseCustomUrls.value) return;
+
+    if (newVal === '') {
+        newVal = 'localhost:8188';
+    }
     const secure = clonedConfig.comfyuiUseSecure.value;
 
     clonedConfig.comfyuiUrl.value = `http${secure ? 's': ''}://${newVal}`;
@@ -56,7 +60,7 @@ watch(clonedConfig.comfyuiUseSecure, (secure) => {
 
         <div class="flex flex-col gap-2">
             <h2 class="text-2xl font-semibold">ComfyUI</h2>
-            <TextSetting label="Base ComfyUI URL" v-model="clonedConfig.baseComfyuiUrl.value" />
+            <TextSetting label="Base ComfyUI URL" v-model="clonedConfig.baseComfyuiUrl.value" placeholder="localhost:8188" />
             <CheckboxSetting label="Secure connection" v-model="clonedConfig.comfyuiUseSecure.value" />
             <CheckboxSetting label="Custom URLs" v-model="clonedConfig.comfyuiUseCustomUrls.value" />
             <div
