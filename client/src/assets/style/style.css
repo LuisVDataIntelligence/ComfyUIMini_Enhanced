@@ -31,12 +31,18 @@ body {
     }
 }
 
+.sortable-chosen .input-draggable-content {
+    transform: scale(0.95);
+    transition: transform 0.15s ease;
+}
+
 .tag-list-enter-active,
 .tag-list-leave-active {
-  transition: all 0.15s ease;
+    transition: all 0.15s ease;
 }
+
 .tag-list-enter-from,
 .tag-list-leave-to {
-  opacity: 0;
-  transform: scale(0.5);
+    opacity: 0;
+    transform: scale(0.5);
 }

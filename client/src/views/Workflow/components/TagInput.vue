@@ -4,9 +4,6 @@ import { VueDraggableNext } from 'vue-draggable-next';
 import { AiOutlineClose } from 'vue-icons-plus/ai';
 import { FaPlus, FaTrash } from 'vue-icons-plus/fa';
 import { TbArrowBigDownFilled, TbArrowBigUpFilled } from 'vue-icons-plus/tb';
-import useConfigStore from '../../../stores/config';
-
-const configStore = useConfigStore();
 
 const props = defineProps<{
     modelValue: string;
@@ -70,8 +67,6 @@ function editTag(tag: string, index: number) {
     tagInputElem.value?.select();
 }
 
-const itemRecentlyRemoved = ref(false);
-
 function removeItem(index: number) {
     const tags = splitTags.value.slice();
     tags.splice(index, 1);
@@ -81,15 +76,6 @@ function removeItem(index: number) {
     if (editingIndex.value === index) {
         editingIndex.value = -1;
     }
-
-    if (!configStore.animationsEnabled) return;
-
-    setTimeout(() => {
-        itemRecentlyRemoved.value = true;
-        setTimeout(() => {
-            itemRecentlyRemoved.value = false;
-        }, 100);
-    }, 50); // Animation
 }
 
 function increaseWeight(index: number) {
@@ -201,21 +187,14 @@ function clearTags() {
 
 <template>
     <div class="flex flex-col">
-        <VueDraggableNext 
-            v-if="splitTags.length > 0" 
-            v-model="splitTags" 
-            tag="ul" 
-            delay="300"
-            class="flex flex-row flex-wrap gap-1"
-        >
-            <transition-group name="tag-list" tag="ul" class="contents">
+        <VueDraggableNext v-if="splitTags.length > 0" v-model="splitTags" tag="ul" delay="300"
+            class="flex flex-row flex-wrap gap-1">
+            <transition-group name="tag-list" class="contents">
                 <li v-for="(tag, index) in splitTags" :key="index">
-                    <div class="bg-slate-800 p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150"
-                        :class="{ 
-                            'brightness-150': index === editingIndex,
-                            'scale-105': itemRecentlyRemoved && configStore.animationsEnabled
-                        }" 
-                        :style="{
+                    <div class="bg-slate-800 p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150 input-draggable-content"
+                        :class="{
+                            'brightness-150': index === editingIndex
+                        }" :style="{
                             'box-shadow': getTagWeightClass(tag),
                             opacity: getTagOpacity(tag),
                         }">

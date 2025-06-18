@@ -123,6 +123,12 @@ function generateDefaultInputsInfo(nodes: WorkflowNodes): AppWorkflowInputInfo[]
                 }
             }
 
+            if (node.class_type === 'CLIPTextEncode' && inputName === 'text') {
+                inputInfoInitial.features = {
+                    tag_input: true
+                }
+            }
+
             inputsInfo.push(inputInfoInitial);
         }
     }
@@ -217,7 +223,7 @@ function exportWorkflow() {
             <span class="text-2xl font-bold">Inputs</span>
             <VueDraggableNext v-model="appWorkflow.inputs_info" class="flex flex-col gap-2" delay="300">
                 <div v-for="(value, index) in appWorkflow.inputs_info" :key="`${value.node_id}${value.input_name}`"
-                    class="" :class="{ 'opacity-75': value.hidden }" role="listitem">
+                    :class="{ 'opacity-75': value.hidden }" role="listitem">
 
                     <div class="flex flex-col grow p-3 bg-slate-700 rounded-xl text-white input-draggable-content">
                         <span class="text-gray-300 italic mb-2">{{ value.input_name }}</span>
@@ -226,12 +232,12 @@ function exportWorkflow() {
                                 class="text-white bg-slate-600 p-2 rounded-lg ring-1 ring-slate-400 font-semibold w-full text-lg">
 
                             <button class="size-10 cursor-pointer rounded-full bg-slate-600"
-                                @click="toggleExtraMenu(index)">
+                                @click="toggleExtraMenu(index)" role="button" title="More options">
                                 <FaBars class="box-content p-2" />
                             </button>
-                            <input :id="index + '_is_hidden'" type="checkbox" v-model="value.hidden" class="hidden">
-                            <label :for="index + '_is_hidden'"
-                                class="*:p-2 *:box-content *:rounded-full cursor-pointer">
+                            <input :id="index + '_is_hidden'" type="checkbox" v-model="value.hidden" class="sr-only">
+                            <label :for="index + '_is_hidden'" class="*:p-2 *:box-content *:rounded-full cursor-pointer"
+                                role="button" title="Hide input">
                                 <PiEyeSlash v-if="value.hidden" class="bg-slate-800" />
                                 <PiEye v-else class="bg-slate-600" />
                             </label>
@@ -270,10 +276,3 @@ function exportWorkflow() {
         </div>
     </div>
 </template>
-
-<style>
-.sortable-chosen .input-draggable-content {
-    transform: scale(0.95);
-    transition: transform 0.2s ease;
-}
-</style>
