@@ -4,7 +4,7 @@ import { PiEye, PiEyeSlash, PiFilePlus } from 'vue-icons-plus/pi';
 import { tryCatch } from '../../utils/tryCatch';
 import { FaBars, FaFileExport, FaSave, FaTrash } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
-import router from '../../router';
+import router from '../../lib/router';
 import { useRoute } from 'vue-router';
 import formatTextForFile from '../../utils/formatTextForFile';
 import { VueDraggableNext } from 'vue-draggable-next';

@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
-import MainLayout from "./layouts/MainLayout.vue";
-import Home from "./views/Home.vue";
-import Import from "./views/Import/Import.vue";
-import Workflow from "./views/Workflow/Workflow.vue";
-import Settings from "./views/Settings/Settings.vue";
-import History from "./views/History/History.vue";
+import MainLayout from "../layouts/MainLayout.vue";
+import Home from "../views/Home.vue";
+import Import from "../views/Import/Import.vue";
+import Workflow from "../views/Workflow/Workflow.vue";
+import Settings from "../views/Settings/Settings.vue";
+import History from "../views/History/History.vue";
 
 const routes = [
     {

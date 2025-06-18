@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, toRaw } from 'vue';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
-import router from '../../router';
+import router from '../../lib/router';
 import { useRoute } from 'vue-router';
 import WorkflowInput from './components/WorkflowInput.vue';
 import useComfyStore from '../../stores/comfyui';
@@ -107,7 +107,7 @@ async function stopGeneration() {
                     :style="{ width: progressPercent + '%' }"></div>
                 <span class="absolute top-0 left-0 text-2xl h-8 pl-2 items-center justify-center flex font-semibold">{{
                     Math.floor(progressPercent)
-                    }}%</span>
+                }}%</span>
             </div>
             <div v-if="displayImageUrls.length === 0"
                 class="bg-gradient-to-br from-slate-700 to-slate-800 w-full aspect-square"></div>
