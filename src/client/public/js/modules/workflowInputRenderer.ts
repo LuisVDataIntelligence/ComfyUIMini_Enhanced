@@ -3,6 +3,7 @@ import { BaseRenderConfig, renderNumberInput, renderSelectInput, renderTextInput
 import { NormalisedComfyInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
 import { getSavedInputValue } from './savedInputValues.js';
 import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
+import { promptAutocompleteManager } from './promptAutocompleteManager.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 
@@ -49,6 +50,14 @@ export function renderInputs(workflowObject: WorkflowWithMetadata, workflowType:
     }
 
     inputsContainer.innerHTML = renderedInputs;
+    
+    // Initialize autocomplete for prompt inputs
+    const textareas = inputsContainer.querySelectorAll('textarea.has-tag-autocomplete');
+    textareas.forEach((textarea) => {
+        const textareaEl = textarea as HTMLTextAreaElement;
+        const title = textareaEl.getAttribute('data-title') || '';
+        promptAutocompleteManager.attachToTextarea(textareaEl, title);
+    });
 }
 
 export function renderInput(

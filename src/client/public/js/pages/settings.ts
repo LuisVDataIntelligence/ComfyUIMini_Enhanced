@@ -8,6 +8,7 @@ const clearSavedInputValuesButton = document.getElementById('clear-saved-input-v
 const compensatePreviewSaturationCheckbox = document.getElementById(
     'compensate-preview-saturation'
 ) as HTMLInputElement;
+const useUnderscoresInTagsCheckbox = document.getElementById('use-underscores-in-tags') as HTMLInputElement;
 
 const allTooltipElems = document.querySelectorAll('[data-tooltip]');
 
@@ -70,11 +71,25 @@ compensatePreviewSaturationCheckbox.addEventListener('change', () => {
     setConfig('workflow.compensatePreviewSaturation', checked);
 });
 
+useUnderscoresInTagsCheckbox.addEventListener('change', () => {
+    const checked = useUnderscoresInTagsCheckbox.checked;
+
+    setConfig('tagAutocomplete.useUnderscores', checked);
+});
+
 function loadConfigsIntoPage() {
     const saturationCompensationConfig = getConfig('workflow.compensatePreviewSaturation') as boolean;
 
     if (saturationCompensationConfig === true || saturationCompensationConfig === undefined) {
         compensatePreviewSaturationCheckbox.checked = true;
+    }
+
+    const useUnderscoresConfig = getConfig('tagAutocomplete.useUnderscores') as boolean;
+
+    if (useUnderscoresConfig === false) {
+        useUnderscoresInTagsCheckbox.checked = false;
+    } else {
+        useUnderscoresInTagsCheckbox.checked = true; // Default to true
     }
 }
 
