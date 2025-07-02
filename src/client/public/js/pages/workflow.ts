@@ -461,7 +461,7 @@ export async function runWorkflow() {
 }
 
 // TODO: Setup type for message for both client and server
-function handleWebSocketMessage(event: MessageEvent<any>) {
+function handleWebSocketMessage(event: MessageEvent<string>) {
     const message = JSON.parse(event.data);
 
     switch (message.type) {

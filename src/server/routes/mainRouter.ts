@@ -10,6 +10,7 @@ import {
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '@shared/types/Requests';
 import loadAndRenderWorkflow from 'server/utils/loadAndRenderWorkflow';
+import path from 'path';
 
 const router = express.Router();
 
@@ -130,6 +131,12 @@ router.get('/allserverworkflows', async (req, res) => {
     });
 
     res.json(infoList);
+});
+
+// Serve the CSV file for tag autocomplete
+router.get('/config/tags.csv', (req, res) => {
+    const csvPath = path.join(process.cwd(), 'config', 'tags.csv');
+    res.sendFile(csvPath);
 });
 
 export default router;

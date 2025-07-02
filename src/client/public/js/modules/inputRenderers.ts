@@ -30,6 +30,15 @@ const createInputContainer = (id: string, title: string, inputHtml: string, addi
 `;
 
 /**
+ * Checks if an input should have autocomplete based on its title
+ */
+function shouldHaveAutocomplete(title: string): boolean {
+    const promptKeywords = ['prompt', 'negative prompt', 'positive prompt', 'text'];
+    const lowerTitle = title.toLowerCase();
+    return promptKeywords.some(keyword => lowerTitle.includes(keyword));
+}
+
+/**
  *
  * @param {SelectRenderConfig} inputOptions Options for the select input.
  * @returns {string}
@@ -77,10 +86,12 @@ export function renderSelectInput(inputOptions: SelectRenderConfig): string {
  */
 export function renderTextInput(inputOptions: TextRenderConfig): string {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
+    const hasAutocomplete = shouldHaveAutocomplete(inputOptions.title);
+    
     return createInputContainer(
         id,
         inputOptions.title,
-        `<textarea id="${id}" class="workflow-input">${inputOptions.default}</textarea>`
+        `<textarea id="${id}" class="workflow-input${hasAutocomplete ? ' has-tag-autocomplete' : ''}" data-title="${inputOptions.title}">${inputOptions.default}</textarea>`
     );
 }
 
