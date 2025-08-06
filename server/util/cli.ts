@@ -1,12 +1,14 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
+export const version = '2.0.0'; // Used elsewhere in the code
+
 let port = 1811;
 let host = 'localhost';
 
 export function handleCliArgs() {
     const argv = yargs(hideBin(process.argv))
-        .version('2.0.0')
+        .version(version)
         .option('host', {
             alias: 'listen',
             type: 'string',

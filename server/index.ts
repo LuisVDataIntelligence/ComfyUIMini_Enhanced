@@ -2,7 +2,7 @@ import { serve } from 'bun';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import logger from './util/logger';
-import { handleCliArgs } from './util/cli';
+import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
 
 const cliArgs = handleCliArgs();
@@ -31,5 +31,6 @@ function startServer() {
     logger.info('Server Startup', '----------------------------------');
 }
 
+logger.info('Server Startup', `Starting ComfyUIMini, v${version}`);
 await ensureBuilt(cliArgs.buildPath, cliArgs.forceBuild);
 startServer();
