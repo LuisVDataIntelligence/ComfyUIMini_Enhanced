@@ -92,9 +92,6 @@ async function stopGeneration() {
         </div>
     </div>
     <div v-else class="size-full flex flex-col gap-2 overflow-y-auto">
-        <RouterLink to="/" class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer">
-            Back
-        </RouterLink>
         <div class="flex flex-col gap-2">
             <div v-for="input in openedWorkflow.inputs_info.filter(input => !input.hidden)"
                 :key="`${input.node_id}${input.input_name}`">

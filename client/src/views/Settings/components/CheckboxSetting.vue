@@ -34,7 +34,7 @@ const id = Math.random().toString(36).substring(2, 15);
 			@keydown.space.prevent="updateValue"
 		>
 			<div
-				class="size-5 bg-white rounded-full transition-transform duration-300"
+				class="size-5 bg-text rounded-full transition-transform duration-300"
 				:class="{ 'translate-x-6': modelValue }"
 			></div>
 		</div>

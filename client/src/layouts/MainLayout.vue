@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import Sidebar from '../components/Sidebar.vue';
-import { AiOutlineMenu } from 'vue-icons-plus/ai';
 import emitter from '../lib/mitt';
+import { FiMenu } from 'vue-icons-plus/fi';
 
 const sidebarOpened = ref(false);
 
@@ -32,10 +32,10 @@ onBeforeUnmount(() => {
         @click="sidebarOpened = false"    
     ></div>
 
-    <div class="flex-1 min-h-screen pl-0 md:pl-64 transition-all duration-dynamic">
+    <div class="flex-1 min-h-screen pl-0 md:pl-64 transition-all duration-dynamic overflow-y-auto">
         <header class="p-1 bg-bg m-2 rounded-lg shadow flex flex-row items-center justify-between">
             <button @click="toggleSidebar" class="md:hidden hover:bg-bg-light aspect-square rounded-md p-2 cursor-pointer">
-                <AiOutlineMenu />
+                <FiMenu />
             </button>
             <RouterLink to="/">
                 <img src="/icons/favicon-256x256.png" alt="Home" class="size-9 hover:scale-95 active:scale-90 transition-all duration-dynamic"></img>
