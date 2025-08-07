@@ -1,48 +1,40 @@
 <script setup lang="ts">
-import { FaFileImport, FaHistory, FaRegEdit } from 'vue-icons-plus/fa';
 import useAppWorkflowsStore from '../stores/appWorkflows';
-import { LuSettings } from 'vue-icons-plus/lu';
+import { LiaMobileSolid } from 'vue-icons-plus/lia';
+import { FiEdit } from 'vue-icons-plus/fi';
 
 const appWorkflowsStore = useAppWorkflowsStore();
 
 </script>
 
 <template>
-    <div class="size-full flex flex-col gap-2">
-        <span class="flex flex-row text-lg font-bold">
-            ComfyUIMini
-            <span class="w-full" role="separator"></span>
-            v2.0.0
-        </span>
-        <RouterLink to="/import"
-            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
-            <FaFileImport class="size-5" />
-            Import Workflow
-        </RouterLink>
-        <div v-if="appWorkflowsStore.appWorkflows.length > 0" class="flex flex-col gap-2" role="list">
-            <RouterLink v-for="(workflow, index) in appWorkflowsStore.appWorkflows" :to="`/workflow/local/${index}`"
-                class="bg-slate-700 rounded-xl cursor-pointer flex flex-row gap-2">
-                <div class="grow p-4">
-                    <span class="text-lg font-bold">{{ workflow.title }}</span>
-                    <p class="text-gray-300 text-sm">{{ workflow.description }}</p>
+    <div>
+        <div 
+            v-if="appWorkflowsStore.appWorkflows.length > 0" 
+            class="flex flex-col gap-2" 
+            role="list"
+        >
+            <RouterLink v-for="(workflow, index) in appWorkflowsStore.appWorkflows" :to="`/workflow/local/${index}`">
+                <div class="bg-bg rounded-lg p-3 cursor-pointer flex flex-row gap-2">
+                    <div class="grow min-h-24 gap-2">
+                        <span class="text-lg text-text font-semibold overflow-x-auto whitespace-nowrap">{{ workflow.title }}</span>
+                        <p class="text">{{ workflow.description }}</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="size-12 flex items-center justify-center">
+                            <LiaMobileSolid class="size-8" />
+                        </div>
+                        <RouterLink :to="`/workflow/local/${index}/edit`">
+                            <div class="size-12 aspect-square flex items-center justify-center bg-bg-light rounded-md">
+                                <FiEdit class="size-6" />
+                            </div>
+                        </RouterLink>
+                    </div>
                 </div>
-                <RouterLink :to="`/workflow/local/${index}/edit`"
-                    class="min-h-12 h-full aspect-square flex items-center justify-center bg-slate-800 rounded-r-xl">
-                    <FaRegEdit class="size-8 translate-x-1" />
-                </RouterLink>
             </RouterLink>
         </div>
-        <span v-else class="font-semibold bg-slate-700 p-4 rounded-xl">No workflows found. Import some using the button
-            above.</span>
-        <RouterLink to="/history"
-            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
-            <FaHistory class="size-5" />
-            History
-        </RouterLink>
-        <RouterLink to="/settings"
-            class="w-full bg-slate-800 text-white p-6 rounded-xl text-center text-lg cursor-pointer flex flex-row gap-2 items-center justify-center">
-            <LuSettings class="size-5" />
-            Settings
-        </RouterLink>
+        <p v-else class="font-semibold bg-bg-light p-4 rounded-lg">
+            No workflows found. Import some using the button in the sidebar.
+        </p>
     </div>
 </template>

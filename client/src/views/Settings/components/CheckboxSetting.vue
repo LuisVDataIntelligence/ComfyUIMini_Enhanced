@@ -10,12 +10,14 @@ const updateValue = () => {
 	emit('update:modelValue', !props.modelValue);
 }
 
+const id = Math.random().toString(36).substring(2, 15);
 </script>
 
 <template>
-	<label class="bg-slate-800 p-2 rounded-xl flex flex-row justify-between items-center" @click="updateValue">
-        <span>{{ label }}</span>
+	<label class="bg-bg p-2 rounded-lg flex flex-row justify-between items-center" @click="updateValue">
+        <label :for="id" class="cursor-pointer text-text">{{ label }}</label>
         <input 
+			:id
             class="sr-only" 
             type="checkbox" 
             :checked="modelValue"
@@ -24,8 +26,8 @@ const updateValue = () => {
         />
 
         <div
-			class="w-12 h-6 flex items-center bg-gray-500 rounded-full cursor-pointer p-0.5 transition-all duration-150"
-			:class="{ 'bg-blue-400!': modelValue }"
+			class="w-12 h-6 flex items-center bg-border-muted hover:bg-border rounded-full cursor-pointer p-0.5 transition-all duration-150"
+			:class="{ 'bg-primary!': modelValue }"
 			role="switch"
 			:aria-checked="modelValue"
 			tabindex="0"

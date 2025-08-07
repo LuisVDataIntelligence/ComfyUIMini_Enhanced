@@ -16,7 +16,7 @@ const openedWorkflow = ref<AppWorkflow>({
     nodes: {},
 });
 
-const inputs = ref([]);
+const inputElems = ref([]);
 
 const progressPercent = ref(0);
 const displayImageUrls = ref<string[]>([]);
@@ -36,7 +36,7 @@ async function generate() {
 
     const workflowCopy = structuredClone(toRaw(openedWorkflow.value));
 
-    inputs.value.map((inputComponent: InstanceType<typeof WorkflowInput>) => {
+    inputElems.value.map((inputComponent: InstanceType<typeof WorkflowInput>) => {
         const inputData = inputComponent.getValue();
 
         if (inputData.value === undefined) {
@@ -98,7 +98,7 @@ async function stopGeneration() {
         <div class="flex flex-col gap-2">
             <div v-for="input in openedWorkflow.inputs_info.filter(input => !input.hidden)"
                 :key="`${input.node_id}${input.input_name}`">
-                <WorkflowInput :input="input" :node="openedWorkflow.nodes[input.node_id]" ref="inputs" />
+                <WorkflowInput :input="input" :node="openedWorkflow.nodes[input.node_id]" ref="inputElems" />
             </div>
         </div>
         <div class="flex flex-col gap-2">

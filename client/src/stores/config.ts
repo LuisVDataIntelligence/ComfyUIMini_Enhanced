@@ -12,6 +12,7 @@ interface Config {
     },
     ui: {
         animations: boolean;
+        transitionSpeedMs: number;
     }
 }
 
@@ -27,7 +28,8 @@ export const useConfigStore = defineStore('config', {
             }
         },
         ui: {
-            animations: true
+            animations: true,
+            transitionSpeedMs: 125,
         },
     }),
     getters: {
@@ -45,6 +47,28 @@ export const useConfigStore = defineStore('config', {
             const protocol = secure ? 'wss://' : 'ws://';
             return `${protocol}${base}/ws`;
         }
+    },
+    actions: {
+        setTransitionSpeed(speed: number) {
+            if (speed < 0) {
+                throw new Error('Transition speed must be between 0 or more.');
+            }
+
+            console.log('Setting transition speed to', speed);
+            this.ui.transitionSpeedMs = speed;
+
+            this.loadTransitionSpeed();
+        },
+        loadTransitionSpeed() {
+            if (this.ui.transitionSpeedMs == 0) {
+                document.body.setAttribute('data-reduce-motion', '1');
+                document.documentElement.style.setProperty('--transition-duration', '0s');
+            } else {
+                // set root attribute to the speed
+                document.documentElement.style.setProperty('--transition-duration', `${this.ui.transitionSpeedMs}ms`);
+                document.body.removeAttribute('data-reduce-motion');
+            }
+        },
     },
     persist: {
         storage: localStorage,

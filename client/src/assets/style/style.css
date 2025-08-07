@@ -1,21 +1,48 @@
 @import "tailwindcss";
 @import './fonts.css';
 
+@theme {
+    --color-bg-dark: oklch(0.1 0.005 315);
+    --color-bg: oklch(0.15 0.005 315);
+    --color-bg-light: oklch(0.2 0.005 315);
+    
+    --color-surface: oklch(0.25 0.005 315);
+    --color-surface-light: oklch(0.3 0.005 315);
+
+    --color-text: oklch(0.96 0.01 315);
+    --color-text-muted: oklch(0.76 0.01 315);
+    --color-highlight: oklch(0.5 0.01 315);
+    --color-border: oklch(0.4 0.01 315);
+    --color-border-muted: oklch(0.3 0.01 315);
+    --color-primary: oklch(0.76 0.1 315);
+    --color-secondary: oklch(0.76 0.1 135);
+    --color-danger: oklch(0.7 0.05 30);
+    --color-warning: oklch(0.7 0.05 100);
+    --color-success: oklch(0.7 0.05 160);
+    --color-info: oklch(0.7 0.05 260);
+}
+
+@layer utilities {
+    .duration-dynamic {
+        transition-duration: var(--transition-duration);
+    }
+}
+
 :root {
     font-family: 'NebulaSans', system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
     color-scheme: light dark;
-    /* Slate 50 */
-    color: oklch(98.4% 0.003 247.858);
-    /* Slate 950 */
-    background-color: oklch(12.9% 0.042 264.695);
+    color: var(--color-text-muted);
+    background-color: var(--color-bg-dark);
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    --transition-duration: 125ms;
 }
 
 body {
@@ -24,11 +51,8 @@ body {
     overflow: hidden;
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: oklch(12.9% 0.042 264.695);
-        background-color: oklch(98.4% 0.003 247.858);
-    }
+h1, h2, h3, h4, h5, h6 {
+    @apply text-text;
 }
 
 .sortable-chosen .input-draggable-content {
