@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import previewBlobToB64 from "../utils/generation/previewBlobToB64";
-import useConfigStore from "./config";
 import { tryCatch } from "../utils/tryCatch";
+import { useConfigStore } from "./config";
 
 async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
     const response = await fetch(`${comfyuiUrl}/api/object_info`);
@@ -12,8 +12,9 @@ async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof r
 }
 
 const useComfyStore = defineStore('comfyui', () => {
-    const comfyuiUrl = useConfigStore().comfyuiUrl;
-    const comfyuiWsUrl = useConfigStore().comfyuiWsUrl;
+    // Todo: have one config variable
+    const comfyuiUrl = useConfigStore().comfyUiUrl;
+    const comfyuiWsUrl = useConfigStore().comfyUiWs;
 
     const comfyObjectInfo = ref<ObjectInfoResponse | null>(null);
     const comfyQueue = ref<QueueResponse>({ queue_running: [], queue_pending: [] });

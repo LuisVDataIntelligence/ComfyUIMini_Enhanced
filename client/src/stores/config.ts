@@ -1,25 +1,52 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
 
-const useConfigStore = defineStore('config', () => {
-    const comfyuiUrl = ref(`http://${window.location.hostname}:8188`);
-    const comfyuiWsUrl = ref(`ws://${window.location.hostname}:8188/ws`);
-    const baseComfyuiUrl = ref(`${window.location.hostname}:8188`);
-    const comfyuiUseSecure = ref<boolean>(false);
-    const comfyuiUseCustomUrls = ref<boolean>(false);
+interface Config {
+    comfyUi: {
+        urlConfig: {
+            base: string;
+            secure: boolean; // Use https/wss?
+            custom: boolean; // Allow inputting custom urls for `url` and `ws`
+            customUrl: string;
+            customWs: string;
+        },
+    },
+    ui: {
+        animations: boolean;
+    }
+}
 
-    const animationsEnabled = ref(true);
+export const useConfigStore = defineStore('config', {
+    state: (): Config => ({
+        comfyUi: {
+            urlConfig: {
+                base: `${window.location.hostname}:8188`,
+                secure: false,
+                custom: false,
+                customUrl: `http://${window.location.hostname}:8188`,
+                customWs: `ws://${window.location.hostname}:8188/ws`
+            }
+        },
+        ui: {
+            animations: true
+        },
+    }),
+    getters: {
+        comfyUiUrl(state): string {
+            const { base, secure, custom, customUrl } = state.comfyUi.urlConfig;
+            if (custom && customUrl) return customUrl;
 
-    return {
-        comfyuiUrl,
-        comfyuiWsUrl,
-        baseComfyuiUrl,
-        comfyuiUseSecure,
-        comfyuiUseCustomUrls,
-        animationsEnabled
-    };
-}, {
-    persist: true,
+            const protocol = secure ? 'https://' : 'http://';
+            return `${protocol}${base}`;
+        },
+        comfyUiWs(state): string {
+            const { base, secure, custom, customWs } = state.comfyUi.urlConfig;
+            if (custom && customWs) return customWs;
+
+            const protocol = secure ? 'wss://' : 'ws://';
+            return `${protocol}${base}/ws`;
+        }
+    },
+    persist: {
+        storage: localStorage,
+    }
 });
-
-export default useConfigStore;
