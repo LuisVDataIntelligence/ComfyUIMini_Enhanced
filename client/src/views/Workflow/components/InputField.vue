@@ -44,13 +44,13 @@ const showExtraMenu = ref(false);
 </script>
 
 <template>
-    <div class="w-full *:bg-slate-600 *:p-2 *:rounded-lg *:w-full">
+    <div class="w-full *:bg-surface *:p-2 *:rounded-lg *:w-full">
         <div v-if="comfyInputInfo[0] === 'INT' || comfyInputInfo[0] === 'FLOAT'" class="flex flex-row gap-2">
             <input class="w-full outline-none" type="number" v-model="inputValue" :min="numberInfo.min ?? undefined"
                 :max="numberInfo.max ?? undefined" :step="numberInfo.step ?? undefined"
                 :title="numberInfo.tooltip ?? undefined" />
             <button v-if="appInputInfo.features" @click="showExtraMenu = !showExtraMenu"
-                class="rounded-sm pointer-coarse:scale-150" :class="{ 'bg-slate-500': showExtraMenu }">
+                class="rounded-sm pointer-coarse:scale-150" :class="{ 'bg-surface-light': showExtraMenu }">
                 <FaPlus class="box-border p-1 pointer-coarse:p-1.5" />
             </button>
         </div>

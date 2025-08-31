@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-    <aside class="flex flex-col fixed top-0 left-0 h-full w-64 bg-surface z-10 transform transition-transform duration-dynamic"
+    <aside class="flex flex-col fixed md:translate-x-0 top-0 left-0 h-full w-64 bg-surface z-10 transform transition-transform duration-dynamic"
         :class="{ '-translate-x-full': !isOpened, 'translate-x-0': isOpened }">
         <SidebarButton text="Home" to="/" :icon="FiHome" class="mt-2" />
         

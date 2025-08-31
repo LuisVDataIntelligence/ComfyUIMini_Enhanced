@@ -191,50 +191,51 @@ function clearTags() {
             class="flex flex-row flex-wrap gap-1">
             <transition-group name="tag-list" class="contents">
                 <li v-for="(tag, index) in splitTags" :key="index">
-                    <div class="bg-slate-800 p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150 input-draggable-content"
+                    <div class="bg-surface-light p-1 box-border select-none rounded-lg flex flex-row items-center justify-center transition-all duration-150 input-draggable-content group"
                         :class="{
                             'brightness-150': index === editingIndex
                         }" :style="{
                             'box-shadow': getTagWeightClass(tag),
                             opacity: getTagOpacity(tag),
                         }">
-                        <div class="flex flex-row gap-1">
+                        <div class="flex flex-row gap-1 md:hidden md:group-hover:flex ml-1">
+                            <div @click.capture="removeItem(index)" class="cursor-pointer text-red-400 aspect-square p-1">
+                                <AiOutlineClose />
+                            </div>
                             <button @click="increaseWeight(index)"
-                                class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-amber-300 transition-all duration-150">
+                                class="cursor-pointer bg-surface p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-amber-300 transition-all duration-150">
                                 <TbArrowBigUpFilled class="p-0.5" />
                             </button>
                             <button @click="decreaseWeight(index)"
-                                class="cursor-pointer bg-slate-900 p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-blue-300 transition-all duration-150">
+                                class="cursor-pointer bg-surface p-1 rounded-md hover:brightness-110 active:brightness-125 active:scale-95 active:text-blue-300 transition-all duration-150">
                                 <TbArrowBigDownFilled class="p-0.5" />
                             </button>
                         </div>
-                        <span class="flex flex-row items-center justify-center gap-1 ml-1">
-                            <span @dblclick="editTag(tag, index)">
+                        <span class="flex flex-row items-center justify-center gap-1">
+                            <span @dblclick="editTag(tag, index)" class="p-1">
                                 {{ getRawTag(tag) }}
                             </span>
-                            <span v-if="getTagWeight(tag)" class="bg-slate-900 rounded-md p-1 text-gray-300">
+                            <span v-if="getTagWeight(tag)" class="bg-surface rounded-md p-1">
                                 {{ getTagWeight(tag) }}
                             </span>
                         </span>
-                        <div @click.capture="removeItem(index)" class="cursor-pointer text-red-400 aspect-square p-1">
-                            <AiOutlineClose />
-                        </div>
                     </div>
                 </li>
             </transition-group>
         </VueDraggableNext>
 
         <div v-else>
-            Enter a keyword and press <kbd class="bg-slate-800 px-1 rounded-sm">+</kbd> get started.
+            Enter a keyword and press <kbd class="bg-surface-light px-1 rounded-sm">+</kbd> get started.
         </div>
-        <form @submit.prevent="handleSubmit" class="flex flex-row gap-2 mt-1">
+        <div class="h-0.5 w-full bg-surface-light my-2"></div>
+        <form @submit.prevent="handleSubmit" class="flex flex-row gap-2">
             <button type="button" @click="clearTags"
-                class="bg-slate-800 text-red-300 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
+                class="bg-surface-light text-red-300 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaTrash class="p-0.5" />
-            </button><input type="text" ref="tagInputElem" class="bg-slate-700 p-2 rounded-lg w-full"
+            </button><input type="text" ref="tagInputElem" class="bg-surface-light p-2 rounded-lg w-full"
                 placeholder="Keyword..." @blur="handleBlur">
             <button type="submit"
-                class="bg-slate-800 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
+                class="bg-surface-light p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaPlus />
             </button>
         </form>

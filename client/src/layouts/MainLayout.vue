@@ -33,7 +33,7 @@ onBeforeUnmount(() => {
     ></div>
 
     <div class="flex-1 min-h-screen pl-0 md:pl-64 transition-all duration-dynamic overflow-y-auto">
-        <header class="p-1 bg-bg m-2 rounded-lg shadow flex flex-row items-center justify-between">
+        <header class="md:hidden p-1 bg-bg m-2 rounded-lg shadow flex flex-row items-center justify-between">
             <button @click="toggleSidebar" class="md:hidden hover:bg-bg-light aspect-square rounded-md p-2 cursor-pointer">
                 <FiMenu />
             </button>
@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <span>v2.0.0</span>
         </header>
-        <main class="px-2">
+        <main class="px-2 md:mt-2">
             <RouterView></RouterView>
         </main>
     </div>
