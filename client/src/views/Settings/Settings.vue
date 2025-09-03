@@ -46,7 +46,7 @@ const testCustomUrls = async () => {
 // Check if we should show CORS help
 const showCorsHelp = computed(() => {
     const error = config.comfyUi.connectionStatus.lastError;
-    return error && error.includes('CORS');
+    return Boolean(error && error.includes('CORS'));
 });
 
 // Debug functions
@@ -68,9 +68,18 @@ const debugDumpConfig = () => {
     console.groupEnd();
 };
 
-// Load debug configuration from server on mount
+// Load debug configuration from server on mount and trigger initial connection test
 onMounted(async () => {
     await config.loadDebugConfig();
+    
+    // Trigger initial connection test for the current configuration
+    if (!config.comfyUi.urlConfig.custom) {
+        // For base URL configuration, test the base connection
+        await config.testConnection('base');
+    } else {
+        // For custom URL configuration, test the custom connection
+        await config.testConnection('custom');
+    }
 });
 </script>
 

@@ -111,6 +111,7 @@ export const useConfigStore = defineStore('config', {
         },
         
         async testConnection(type: 'base' | 'custom'): Promise<boolean> {
+            console.log(`[CONNECTION] Starting connection test for type: ${type}`);
             // Set testing status
             this.comfyUi.connectionStatus[type] = 'testing';
             this.comfyUi.connectionStatus.lastError = null;
@@ -123,6 +124,8 @@ export const useConfigStore = defineStore('config', {
                     url = this.comfyUi.urlConfig.customUrl;
                 }
                 
+                console.log(`[CONNECTION] Testing connection to: ${url} (debug enabled: ${this.debug.enabled})`);
+                
                 if (this.debug.enabled && this.debug.showConnectionLogs) {
                     console.log(`[DEBUG] Testing connection to: ${url}`);
                     console.log(`[DEBUG] Config state:`, {
@@ -133,12 +136,13 @@ export const useConfigStore = defineStore('config', {
                     });
                 }
                 
-                // Use Promise.race for timeout instead of AbortController
-                const fetchPromise = fetch(`${url}/`, {
-                    method: 'GET',
+                // Use server-side proxy for connection testing to avoid CORS issues
+                const fetchPromise = fetch('/api/debug/test-connection', {
+                    method: 'POST',
                     headers: {
-                        'Accept': 'text/html,application/json,*/*'
-                    }
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
                 });
                 
                 const timeoutPromise = new Promise((_, reject) => {
@@ -151,13 +155,23 @@ export const useConfigStore = defineStore('config', {
                     console.log(`[DEBUG] Response status: ${response.status}`);
                 }
                 
-                // ComfyUI root endpoint should return something (even if 200, 404, etc.)
-                if (response.status < 500) { // Accept any non-server-error response
-                    this.comfyUi.connectionStatus[type] = 'connected';
-                    this.comfyUi.connectionStatus.lastTested = Date.now();
-                    return true;
+                // Parse the server proxy response
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (this.debug.enabled && this.debug.showConnectionLogs) {
+                        console.log(`[DEBUG] Server proxy result:`, result);
+                    }
+                    
+                    if (result.success) {
+                        this.comfyUi.connectionStatus[type] = 'connected';
+                        this.comfyUi.connectionStatus.lastTested = Date.now();
+                        return true;
+                    } else {
+                        throw new Error(result.error || 'Connection failed');
+                    }
                 } else {
-                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    throw new Error(`Server proxy error: ${response.status} ${response.statusText}`);
                 }
             } catch (error) {
                 if (this.debug.enabled && this.debug.showConnectionLogs) {
@@ -207,10 +221,12 @@ export const useConfigStore = defineStore('config', {
 
         // Fetch debug configuration from server
         async loadDebugConfig(): Promise<void> {
+            console.log('[CONFIG] Attempting to load debug configuration from server...');
             try {
                 const response = await fetch('/api/debug/config');
                 if (response.ok) {
                     const debugConfig = await response.json();
+                    console.log('[CONFIG] Server debug config received:', debugConfig);
                     
                     // Update debug configuration from server
                     this.debug.enabled = debugConfig.enabled;
@@ -218,14 +234,15 @@ export const useConfigStore = defineStore('config', {
                     this.debug.showConfigChanges = debugConfig.showConfigChanges;
                     this.debug.buildType = debugConfig.buildType;
                     
+                    console.log('[CONFIG] Debug configuration loaded successfully - enabled:', this.debug.enabled);
                     if (this.debug.enabled) {
-                        console.log('[DEBUG] Debug configuration loaded from server:', debugConfig);
+                        console.log('[DEBUG] Debug mode is now active with connection logs:', this.debug.showConnectionLogs);
                     }
                 } else {
-                    console.warn('Failed to load debug configuration from server');
+                    console.warn('[CONFIG] Failed to load debug configuration from server - response not ok:', response.status);
                 }
             } catch (error) {
-                console.warn('Could not fetch debug configuration:', error);
+                console.warn('[CONFIG] Could not fetch debug configuration:', error);
                 // Keep default (disabled) debug configuration
             }
         }
