@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout.vue";
 import Home from "../views/Home.vue";
 import Import from "../views/Import/Import.vue";
 import Workflow from "../views/Workflow/Workflow.vue";
+import Generate from "../views/Generate/Generate.vue";
 import Settings from "../views/Settings/Settings.vue";
 import History from "../views/History/History.vue";
 
@@ -20,6 +21,11 @@ const routes = [
                 path: 'import',
                 name: 'Import',
                 component: Import
+            },
+            {
+                path: 'generate',
+                name: 'Generate',
+                component: Generate
             },
             {
                 path: 'workflow/:type/:index',
