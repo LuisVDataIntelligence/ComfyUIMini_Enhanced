@@ -4,11 +4,17 @@ import { serveStatic } from 'hono/bun';
 import logger from './util/logger';
 import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
+import tagSearchRouter from './src/routes/tagSearchRouter';
+import createDebugRouter from './src/routes/debugRouter';
 
 const cliArgs = handleCliArgs();
 
 function startServer() {
     const app = new Hono();
+
+    // API routes
+    app.route('/api/tags', tagSearchRouter);
+    app.route('/api/debug', createDebugRouter(cliArgs));
 
     app.use('/assets/*', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.js', serveStatic({ root: cliArgs.buildPath }))

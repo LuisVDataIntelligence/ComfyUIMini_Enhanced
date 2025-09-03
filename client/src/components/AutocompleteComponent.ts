@@ -13,8 +13,6 @@ export class AutocompleteComponent {
     private selectedIndex = -1;
     private suggestions: AutocompleteItem[] = [];
     private currentWord = '';
-    private currentWordStart = 0;
-    private currentWordEnd = 0;
 
     constructor(textarea: HTMLTextAreaElement) {
         this.textarea = textarea;
@@ -133,8 +131,6 @@ export class AutocompleteComponent {
         }
         
         this.currentWord = (wordStartMatch[1] + (wordEndMatch ? wordEndMatch[1] : '')).trim();
-        this.currentWordStart = cursorPos - wordStartMatch[1].length;
-        this.currentWordEnd = cursorPos + (wordEndMatch ? wordEndMatch[1].length : 0);
         
         if (this.currentWord.length < 2) {
             this.hide();

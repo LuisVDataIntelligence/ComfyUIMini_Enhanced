@@ -16,7 +16,10 @@ class TagSearcher {
     private fileExists = false;
 
     constructor() {
-        this.tagsFilePath = path.join(process.cwd(), 'config', 'tags.csv');
+        // Since we're running from server directory, go up one level to project root
+        const projectRoot = path.resolve(process.cwd(), '..');
+        this.tagsFilePath = path.join(projectRoot, 'shared', 'config', 'tags.csv');
+        console.log('Looking for tags file at:', this.tagsFilePath);
     }
 
     /**
