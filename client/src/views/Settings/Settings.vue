@@ -3,8 +3,21 @@ import TextSetting from './components/TextSetting.vue';
 import CheckboxSetting from './components/CheckboxSetting.vue';
 import { useConfigStore } from '../../stores/config';
 import SelectionSetting from './components/SelectionSetting.vue';
+import { ref, onMounted } from 'vue';
 
 const config = useConfigStore();
+
+const useUnderscoresInTags = ref(localStorage.getItem('tagAutocomplete.useUnderscores') !== 'false');
+
+onMounted(() => {
+    // keep localStorage in sync
+    localStorage.setItem('tagAutocomplete.useUnderscores', String(useUnderscoresInTags.value));
+});
+
+function toggleUseUnderscores() {
+    useUnderscoresInTags.value = !useUnderscoresInTags.value;
+    localStorage.setItem('tagAutocomplete.useUnderscores', String(useUnderscoresInTags.value));
+}
 </script>
 
 <template>
@@ -31,6 +44,13 @@ const config = useConfigStore();
                 v-model="config.ui.transitionSpeedMs"
                 @update:model-value="config.loadTransitionSpeed()"
              />
+            <div class="mt-4">
+                <label class="text-text font-medium">Tag Autocomplete</label>
+                <div class="flex items-center gap-2 mt-2">
+                    <CheckboxSetting :label="'Use underscores in tag suggestions'" :model-value="useUnderscoresInTags"
+                        @update:model-value="toggleUseUnderscores" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
