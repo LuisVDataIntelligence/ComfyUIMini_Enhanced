@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, toRaw } from 'vue';
+import { onBeforeMount, ref, toRaw, onMounted, nextTick } from 'vue';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../lib/router';
 import { useRoute } from 'vue-router';
 import WorkflowInput from './components/WorkflowInput.vue';
+import { promptAutocompleteManager } from '../../lib/promptAutocompleteManager';
 import useComfyStore from '../../stores/comfyui';
 import { FaEdit, FaHistory, FaPlay, FaStop } from 'vue-icons-plus/fa';
 
@@ -29,6 +30,15 @@ onBeforeMount(() => {
 
     openedWorkflow.value = appWorkflowsStore.appWorkflows[workflowIndex];
     displayImageUrls.value = openedWorkflow.value.lastGeneratedImages ?? [];
+});
+
+onMounted(async () => {
+    // Wait for DOM to render inputs
+    await nextTick();
+    const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    textareas.forEach((el) => {
+        promptAutocompleteManager.attachToTextarea(el as HTMLTextAreaElement);
+    });
 });
 
 async function generate() {

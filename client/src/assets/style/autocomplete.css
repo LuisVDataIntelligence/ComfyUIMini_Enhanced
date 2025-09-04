@@ -1,0 +1,5 @@
+.autocomplete-container { position: relative; }
+.autocomplete-dropdown { position: absolute; z-index: 50; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 240px; overflow: auto; }
+.autocomplete-item { padding: 6px 8px; cursor: pointer; }
+.autocomplete-item:hover, .autocomplete-item.selected { background: var(--surface-light); }
+.autocomplete-item .alias { font-size: 0.85em; color: var(--muted); margin-left: 6px; }

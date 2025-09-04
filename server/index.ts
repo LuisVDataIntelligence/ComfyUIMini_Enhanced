@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/bun';
 import logger from './util/logger';
 import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
+import { tagSearchRouter } from './routes/tagSearch';
 
 const cliArgs = handleCliArgs();
 
@@ -15,6 +16,9 @@ function startServer() {
     app.use('/*.css', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.ico', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.png', serveStatic({ root: cliArgs.buildPath }))
+
+    // Tag search API routes
+    app.route('/api/tags', tagSearchRouter);
 
     app.use('*', serveStatic({ root: cliArgs.buildPath, path: './index.html' }))
 
