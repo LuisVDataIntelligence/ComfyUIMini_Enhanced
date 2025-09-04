@@ -4,7 +4,6 @@ import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../lib/router';
 import { useRoute } from 'vue-router';
 import WorkflowInput from './components/WorkflowInput.vue';
-import { promptAutocompleteManager } from '../../lib/promptAutocompleteManager';
 import useComfyStore from '../../stores/comfyui';
 import { FaEdit, FaHistory, FaPlay, FaStop } from 'vue-icons-plus/fa';
 
@@ -35,10 +34,11 @@ onBeforeMount(() => {
 onMounted(async () => {
     // Wait for DOM to render inputs
     await nextTick();
-    const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
-    textareas.forEach((el) => {
-        promptAutocompleteManager.attachToTextarea(el as HTMLTextAreaElement);
-    });
+    // Note: Tag autocomplete functionality removed for now
+    // const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    // textareas.forEach((el) => {
+    //     // Autocomplete attachment would go here
+    // });
 });
 
 async function generate() {

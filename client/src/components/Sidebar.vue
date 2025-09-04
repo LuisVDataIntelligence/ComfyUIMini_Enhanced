@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SidebarButton from './SidebarButton.vue';
-import { FiFilePlus, FiHome, FiImage, FiSettings } from 'vue-icons-plus/fi';
+import { FiFilePlus, FiHome, FiImage, FiSettings, FiZap } from 'vue-icons-plus/fi';
 
 defineProps<{
     isOpened: boolean;
@@ -14,6 +14,7 @@ defineProps<{
         
         <div class="grow"></div>
         <div class="flex flex-col gap-2 mb-2">
+            <SidebarButton text="Generate" to="/generate" :icon="FiZap" />
             <SidebarButton text="Import Workflow" to="/import" :icon="FiFilePlus" />
             <SidebarButton text="History" to="/history" :icon="FiImage" />
             <SidebarButton text="Settings" to="/settings" :icon="FiSettings" />
