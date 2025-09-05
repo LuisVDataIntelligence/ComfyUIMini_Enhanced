@@ -44,9 +44,9 @@ const testCustomUrls = async () => {
 };
 
 // Check if we should show CORS help
-const showCorsHelp = computed(() => {
+const showCorsHelp = computed<boolean>(() => {
     const error = config.comfyUi.connectionStatus.lastError;
-    return error && error.includes('CORS');
+    return !!(error && error.includes('CORS'));
 });
 
 // Debug functions

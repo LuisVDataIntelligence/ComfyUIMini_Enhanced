@@ -59,12 +59,17 @@ export function createDebugRouter(cliArgs: any) {
             });
             const endTime = Date.now();
 
+            const headersObj: Record<string, string> = {};
+            response.headers.forEach((value, key) => {
+                headersObj[key] = value;
+            });
+
             return c.json({
                 success: response.ok,
                 status: response.status,
                 statusText: response.statusText,
                 responseTime: endTime - startTime,
-                headers: Object.fromEntries(response.headers.entries())
+                headers: headersObj
             });
         } catch (error) {
             return c.json({
