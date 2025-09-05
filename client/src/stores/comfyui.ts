@@ -4,7 +4,7 @@ import previewBlobToB64 from "../utils/generation/previewBlobToB64";
 import { tryCatch } from "../utils/tryCatch";
 import { useConfigStore } from "./config";
 
-async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
+async function initComfyData(_comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
     // Use server proxy instead of direct ComfyUI connection to avoid CORS issues
     const response = await fetch('/api/comfyui/object_info');
     const data = await response.json();
