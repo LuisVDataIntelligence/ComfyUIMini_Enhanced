@@ -7,6 +7,7 @@ import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
 import tagSearchRouter from './src/routes/tagSearchRouter';
 import createDebugRouter from './src/routes/debugRouter';
+import comfyuiRouter from './src/routes/comfyuiRouter';
 
 const cliArgs = handleCliArgs();
 const PORT = Number(process.env.PORT) || cliArgs.port;
@@ -29,6 +30,7 @@ function startServer() {
     // API routes
     app.route('/api/tags', tagSearchRouter);
     app.route('/api/debug', createDebugRouter(cliArgs));
+    app.route('/api/comfyui', comfyuiRouter);
 
     app.use('/assets/*', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.js', serveStatic({ root: cliArgs.buildPath }))

@@ -33,6 +33,89 @@ A mobile-friendly WebUI to run ComfyUI workflows.
 
 You can find a guide to installing and running the app on the **[getting started](https://github.com/ImDarkTom/ComfyUIMini/wiki/Getting-Started)** page.
 
+### Quick Start
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/ImDarkTom/ComfyUIMini.git
+   cd ComfyUIMini
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   bun install
+   ```
+
+3. **Start the server**:
+   ```bash
+   ./runcomfyuimini.sh
+   ```
+
+### Advanced Configuration
+
+ComfyUI Mini includes a configuration script for easy setup with environment variables.
+
+#### Using the Startup Script
+
+The `runcomfyuimini.sh` script automatically loads configuration from a `.env` file:
+
+```bash
+# Make executable (first time only)
+chmod +x runcomfyuimini.sh
+
+# Start with default configuration
+./runcomfyuimini.sh
+```
+
+#### Configuration Options
+
+Create or edit the `.env` file in the root directory:
+
+```bash
+# Network Configuration
+HOST=0.0.0.0          # Use 0.0.0.0 for LAN access, localhost for local only
+PORT=1811             # Server port
+
+# Debug Configuration
+DEBUG=true            # Enable debug mode
+DEBUG_CONNECTION=true # Enable connection debugging
+DEBUG_CONFIG=true     # Enable configuration debugging
+
+# Build Configuration
+FORCE_BUILD=false     # Force rebuild of client
+BUILD_PATH=./build    # Path to built client files
+```
+
+#### Manual Server Start
+
+You can also start the server manually with command-line arguments:
+
+```bash
+cd server
+
+# Local access only
+bun run index.ts
+
+# LAN access with debug
+bun run index.ts --host 0.0.0.0 --debug --debug-connection
+
+# Custom port
+bun run index.ts --port 8080
+
+# Force rebuild
+bun run index.ts --force-build
+```
+
+#### Available Command-Line Options
+
+- `--host <host>` or `--listen <host>`: Specify host to bind to (default: localhost)
+- `--port <port>` or `-p <port>`: Specify port (default: 1811) 
+- `--debug`: Enable debug mode with enhanced logging
+- `--debug-connection`: Enable connection debugging
+- `--debug-config`: Enable configuration change debugging
+- `--force-build`: Force rebuild of client files
+- `--build-path <path>`: Specify custom build directory
+
 ## Tag Autocomplete Setup
 
 ComfyUI Mini includes booru-style autocomplete for prompt inputs that helps you discover and use popular tags.
