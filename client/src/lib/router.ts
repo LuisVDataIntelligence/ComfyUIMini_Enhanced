@@ -38,6 +38,11 @@ const routes = [
                 component: Import
             },
             {
+                path: 'generate',
+                name: 'Generate',
+                component: Generate
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: Settings

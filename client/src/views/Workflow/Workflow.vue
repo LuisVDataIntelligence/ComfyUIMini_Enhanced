@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw } from 'vue';
+import { onMounted, ref, toRaw, nextTick } from 'vue';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../lib/router';
 import { useRoute } from 'vue-router';
@@ -49,6 +49,16 @@ onMounted(() => {
     
     isInitialized.value = true;
     console.log('[WORKFLOW] Initialization complete');
+});
+
+onMounted(async () => {
+    // Wait for DOM to render inputs
+    await nextTick();
+    // Note: Tag autocomplete functionality removed for now
+    // const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    // textareas.forEach((el) => {
+    //     // Autocomplete attachment would go here
+    // });
 });
 
 async function generate() {

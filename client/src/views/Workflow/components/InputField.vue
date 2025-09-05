@@ -60,7 +60,7 @@ const showExtraMenu = ref(false);
                 :title="comfyInputInfo[1].tooltip ?? undefined" />
 
             <textarea v-else-if="!appInputInfo.features?.tag_input" :title="comfyInputInfo[1].tooltip ?? undefined"
-                v-model="inputValue">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>
+                class="has-tag-autocomplete" v-model="inputValue">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>
 
             <TagInput v-else v-model="inputValue" :default="defaultValue ?? comfyInputInfo[1].default ?? ''"></TagInput>
         </template>
