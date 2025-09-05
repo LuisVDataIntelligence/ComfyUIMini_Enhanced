@@ -1,14 +1,28 @@
 import { serve } from 'bun';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
+import { cors } from 'hono/cors';
 import logger from './util/logger';
 import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
 
 const cliArgs = handleCliArgs();
+const PORT = Number(process.env.PORT) || cliArgs.port;
+const HOST = process.env.HOST || cliArgs.host;
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 function startServer() {
     const app = new Hono();
+    app.use(
+        '*',
+        cors({
+            origin: allowedOrigins,
+            allowMethods: ['GET', 'POST'],
+        })
+    );
 
     app.use('/assets/*', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.js', serveStatic({ root: cliArgs.buildPath }))
@@ -20,9 +34,9 @@ function startServer() {
 
     logger.info('Server Startup', 'Starting server...');
     const server = serve({
-        port: cliArgs.port,
+        port: PORT,
         fetch: app.fetch,
-        hostname: cliArgs.host,
+        hostname: HOST,
         development: false,
     });
 

@@ -1,4 +1,4 @@
-import { AutocompleteComponent, AutocompleteItem } from '../common/autocompleteComponent.js';
+import { AutocompleteComponent, type AutocompleteItem } from '../components/AutocompleteComponent.js';
 import { tagAutocomplete } from './tagAutocomplete.js';
 
 export class PromptAutocompleteManager {
@@ -85,4 +85,4 @@ export class PromptAutocompleteManager {
 }
 
 // Global instance
-export const promptAutocompleteManager = new PromptAutocompleteManager(); 
+export const promptAutocompleteManager = new PromptAutocompleteManager();
