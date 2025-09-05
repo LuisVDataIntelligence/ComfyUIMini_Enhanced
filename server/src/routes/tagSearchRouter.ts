@@ -1,14 +1,14 @@
-import express from 'express';
+import { Hono } from 'hono';
 import { z } from 'zod';
 import { tagSearcher } from '../utils/tagSearchUtils';
 
-const router = express.Router();
+const router = new Hono();
 
 /**
  * Search for tags based on query string
  * GET /api/tags/search?q=query&limit=10
  */
-router.get('/search', async (req, res): Promise<void> => {
+router.get('/search', async (c) => {
     try {
         const querySchema = z.object({
             q: z.string().min(1),
@@ -20,17 +20,15 @@ router.get('/search', async (req, res): Promise<void> => {
             underscores: z.string().optional(),
         });
 
-        const parsed = querySchema.safeParse(req.query);
+        const parsed = querySchema.safeParse(Object.fromEntries(new URL(c.req.url).searchParams));
         if (!parsed.success) {
-            res.status(400).json({ error: parsed.error.message });
-            return;
+            return c.json({ error: parsed.error.message }, 400);
         }
 
         const { q, limit = 10, underscores } = parsed.data;
 
         if (q.length < 2) {
-            res.json({ results: [] });
-            return;
+            return c.json({ results: [], query: q, count: 0 });
         }
 
         const useUnderscores = underscores !== 'false'; // Default to true
@@ -43,35 +41,31 @@ router.get('/search', async (req, res): Promise<void> => {
             matchedAlias: result.matchedAlias ? (useUnderscores ? result.matchedAlias : result.matchedAlias.replace(/_/g, ' ')) : undefined
         }));
         
-        res.json({ 
-            results: processedResults,
-            query: q,
-            count: processedResults.length
-        });
+        return c.json({ results: processedResults, query: q, count: processedResults.length });
 
     } catch (error) {
         console.error('Tag search error:', error);
-        res.status(500).json({ error: 'Internal server error during tag search' });
+        return c.json({ error: 'Internal server error during tag search' }, 500);
     }
 });
 
 /**
  * Health check endpoint to verify tags file availability
  */
-router.get('/health', async (req, res): Promise<void> => {
+router.get('/health', async (c) => {
     try {
         // Try a simple search to verify the file is accessible
         const testResults = await tagSearcher.searchTags('test', 1);
-        res.json({ 
+        return c.json({ 
             status: 'ok', 
             message: 'Tag search service is operational',
             hasResults: testResults.length > 0
         });
     } catch {
-        res.status(503).json({ 
+        return c.json({ 
             status: 'error', 
             message: 'Tag search service is unavailable'
-        });
+        }, 503);
     }
 });
 

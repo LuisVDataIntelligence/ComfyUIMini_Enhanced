@@ -5,6 +5,8 @@ import { cors } from 'hono/cors';
 import logger from './util/logger';
 import { handleCliArgs, version } from './util/cli';
 import { ensureBuilt } from './util/build';
+import tagSearchRouter from './src/routes/tagSearchRouter';
+import createDebugRouter from './src/routes/debugRouter';
 
 const cliArgs = handleCliArgs();
 const PORT = Number(process.env.PORT) || cliArgs.port;
@@ -23,6 +25,10 @@ function startServer() {
             allowMethods: ['GET', 'POST'],
         })
     );
+
+    // API routes
+    app.route('/api/tags', tagSearchRouter);
+    app.route('/api/debug', createDebugRouter(cliArgs));
 
     app.use('/assets/*', serveStatic({ root: cliArgs.buildPath }))
     app.use('/*.js', serveStatic({ root: cliArgs.buildPath }))
