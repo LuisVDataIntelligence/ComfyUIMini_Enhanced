@@ -86,3 +86,12 @@ This is a monorepo with client-server architecture for ComfyUI Mini, a mobile-fr
 - Server automatically builds client if needed on startup
 - Tag autocomplete requires `config/tags.csv` file with booru-style tag data
 - Client uses server proxy to avoid ComfyUI CORS issues
+- All CSS variables use consistent design tokens (see `client/src/assets/style/style.css`)
+- API requests validated using Zod schemas for type safety and security
+
+### Recent Improvements
+- **Code Cleanup**: Removed duplicate CSS files and large diff files to reduce repository size
+- **CSS Consistency**: Fixed all undefined CSS variables to use proper design tokens
+- **API Validation**: Added comprehensive Zod schema validation for ComfyUI API endpoints
+- **Documentation**: Enhanced with environment configuration and validation architecture details
+- memorize after making changes, shutdown the server, rebuild necessary functions, increment version, and test relevant code changes before calling code "complete"

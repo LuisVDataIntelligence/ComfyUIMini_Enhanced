@@ -4,9 +4,20 @@ import previewBlobToB64 from "../utils/generation/previewBlobToB64";
 import { tryCatch } from "../utils/tryCatch";
 import { useConfigStore } from "./config";
 
-async function initComfyData(_comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
-    // Use server proxy instead of direct ComfyUI connection to avoid CORS issues
-    const response = await fetch('/api/comfyui/object_info');
+async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
+    // Use server proxy when served through ComfyUIMini server, direct connection only when served externally
+    const useProxy = window.location.port !== '8188' && window.location.port !== '80' && window.location.port !== '443';
+    
+    let apiUrl: string;
+    if (useProxy) {
+        // Use server proxy to avoid CORS issues in development
+        apiUrl = '/api/comfyui/object_info';
+    } else {
+        // Use direct connection for production
+        apiUrl = `${comfyuiUrl}/api/object_info`;
+    }
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
 
     objectInfo.value = data;
@@ -62,7 +73,20 @@ const useComfyStore = defineStore('comfyui', () => {
     }
 
     async function* generate(workflow: WorkflowNodes): AsyncGenerator<GeneratorYield, void, unknown> {
-        const socket = new WebSocket(comfyuiWsUrl.value + '?clientId=comfyuimini');
+        // Use server WebSocket proxy when served through ComfyUIMini server, direct connection only when served externally  
+        const useProxy = window.location.port !== '8188' && window.location.port !== '80' && window.location.port !== '443';
+        
+        let wsUrl: string;
+        if (useProxy) {
+            // Use server WebSocket proxy for development to avoid CORS issues
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            wsUrl = `${wsProtocol}//${window.location.host}/api/comfyui/ws?clientId=comfyuimini`;
+        } else {
+            // Use direct WebSocket connection for production
+            wsUrl = `${comfyuiWsUrl.value}?clientId=comfyuimini`;
+        }
+        
+        const socket = new WebSocket(wsUrl);
         let promptId: string | null = null;
 
         const messageQueue: GeneratorYield[] = [];
@@ -77,8 +101,15 @@ const useComfyStore = defineStore('comfyui', () => {
             setSocketOpen();
             console.log('Connected to ComfyUI websocket.');
 
-            // Send prompt via server proxy
-            const response = await fetch('/api/comfyui/prompt', {
+            // Send prompt via proxy or direct connection based on environment
+            let promptUrl: string;
+            if (useProxy) {
+                promptUrl = '/api/comfyui/prompt';
+            } else {
+                promptUrl = `${comfyuiUrl.value}/prompt`;
+            }
+            
+            const response = await fetch(promptUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,6 +223,17 @@ const useComfyStore = defineStore('comfyui', () => {
         refreshQueue();
     }
 
+    async function clearHistory() {
+        try {
+            // Since ComfyUI doesn't support clearing history via API,
+            // we clear it locally in the client
+            comfyHistory.value = {};
+            console.log('History cleared successfully (local only)');
+        } catch (error) {
+            console.error('Error clearing history:', error);
+        }
+    }
+
     fetchComfyObjectInfo();
 
     return {
@@ -201,6 +243,7 @@ const useComfyStore = defineStore('comfyui', () => {
         history: comfyHistory,
         objectInfo: comfyObjectInfo,
         loadFullHistory,
+        clearHistory,
         stopGeneration,
         fetchComfyObjectInfo,
         getInputInfo,

@@ -232,8 +232,8 @@ function clearTags() {
             <button type="button" @click="clearTags"
                 class="bg-surface-light text-red-300 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaTrash class="p-0.5" />
-            </button><input type="text" ref="tagInputElem" class="bg-surface-light p-2 rounded-lg w-full"
-                placeholder="Keyword..." @blur="handleBlur">
+            </button><input type="text" ref="tagInputElem" class="has-tag-autocomplete bg-surface-light p-2 rounded-lg w-full"
+                placeholder="Keyword..." @blur="handleBlur" title="prompt">
             <button type="submit"
                 class="bg-surface-light p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaPlus />

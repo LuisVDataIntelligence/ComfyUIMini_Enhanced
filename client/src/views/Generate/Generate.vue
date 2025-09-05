@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import useComfyStore from '../../stores/comfyui';
 import { FaPlay, FaStop } from 'vue-icons-plus/fa';
+import { promptAutocompleteManager } from '../../lib/promptAutocompleteManager';
 
 const comfyuiStore = useComfyStore();
 
@@ -58,6 +59,20 @@ onMounted(() => {
     if (availableSchedulers.value.length > 0 && !scheduler.value) {
         scheduler.value = availableSchedulers.value[0];
     }
+});
+
+// Setup autocomplete for prompt textareas
+onMounted(async () => {
+    // Wait for DOM to render
+    await nextTick();
+    
+    // Setup autocomplete for textareas with has-tag-autocomplete class
+    const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    textareas.forEach((textarea) => {
+        const inputElement = textarea as HTMLTextAreaElement;
+        const inputTitle = inputElement.getAttribute('title') || inputElement.placeholder || 'prompt';
+        promptAutocompleteManager.attachToTextarea(inputElement, inputTitle);
+    });
 });
 
 // Image generation state
@@ -209,22 +224,26 @@ function randomizeSeed() {
             
             <!-- Positive Prompt -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium">Positive Prompt</label>
+                <label for="positive-prompt" class="font-medium">Positive Prompt</label>
                 <textarea 
+                    id="positive-prompt"
                     v-model="positivePrompt" 
-                    class="w-full p-3 bg-bg-light rounded-lg resize-none"
+                    class="has-tag-autocomplete w-full p-3 bg-bg-light rounded-lg resize-none"
                     placeholder="Enter positive prompt..."
+                    title="positive prompt"
                     rows="3"
                 />
             </div>
 
             <!-- Negative Prompt -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium">Negative Prompt</label>
+                <label for="negative-prompt" class="font-medium">Negative Prompt</label>
                 <textarea 
+                    id="negative-prompt"
                     v-model="negativePrompt" 
-                    class="w-full p-3 bg-bg-light rounded-lg resize-none"
+                    class="has-tag-autocomplete w-full p-3 bg-bg-light rounded-lg resize-none"
                     placeholder="Enter negative prompt..."
+                    title="negative prompt"
                     rows="2"
                 />
             </div>
@@ -232,8 +251,9 @@ function randomizeSeed() {
             <!-- Dimensions -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium">Width</label>
+                    <label for="width-input" class="font-medium">Width</label>
                     <input 
+                        id="width-input"
                         v-model.number="width" 
                         type="number" 
                         step="8" 
@@ -243,8 +263,9 @@ function randomizeSeed() {
                     />
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium">Height</label>
+                    <label for="height-input" class="font-medium">Height</label>
                     <input 
+                        id="height-input"
                         v-model.number="height" 
                         type="number" 
                         step="8" 
@@ -258,8 +279,9 @@ function randomizeSeed() {
             <!-- Sampling Parameters -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium">Steps</label>
+                    <label for="steps-input" class="font-medium">Steps</label>
                     <input 
+                        id="steps-input"
                         v-model.number="steps" 
                         type="number" 
                         min="1" 
@@ -268,8 +290,9 @@ function randomizeSeed() {
                     />
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium">CFG Scale</label>
+                    <label for="cfg-scale-input" class="font-medium">CFG Scale</label>
                     <input 
+                        id="cfg-scale-input"
                         v-model.number="cfgScale" 
                         type="number" 
                         step="0.1" 
@@ -295,8 +318,8 @@ function randomizeSeed() {
                     </select>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium">Scheduler</label>
-                    <select v-model="scheduler" class="w-full p-3 bg-bg-light rounded-lg">
+                    <label for="scheduler-select" class="font-medium">Scheduler</label>
+                    <select id="scheduler-select" v-model="scheduler" class="w-full p-3 bg-bg-light rounded-lg">
                         <option 
                             v-for="schedulerOption in availableSchedulers" 
                             :key="schedulerOption" 
@@ -310,10 +333,12 @@ function randomizeSeed() {
 
             <!-- Model Selection -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium">Model</label>
+                <label for="model-select" class="font-medium">Model</label>
                 <select 
+                    id="model-select"
                     v-model="modelName" 
                     class="w-full p-3 bg-bg-light rounded-lg"
+                    :class="{ 'ring-2 ring-amber-400': !modelName && availableCheckpoints.length > 0 }"
                     :disabled="availableCheckpoints.length === 0"
                 >
                     <option value="" disabled>
@@ -330,13 +355,17 @@ function randomizeSeed() {
                 <small class="text-text/70">
                     {{ availableCheckpoints.length }} model(s) available in ComfyUI
                 </small>
+                <div v-if="!modelName && availableCheckpoints.length > 0" class="text-amber-400 text-sm flex items-center gap-1">
+                    ⚠️ No model selected - generation may fail without a checkpoint
+                </div>
             </div>
 
             <!-- Seed -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium">Seed</label>
+                <label for="seed-input" class="font-medium">Seed</label>
                 <div class="flex gap-2">
                     <input 
+                        id="seed-input"
                         v-model.number="seed" 
                         type="number" 
                         min="-1"

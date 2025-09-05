@@ -1,4 +1,4 @@
-import { useConfigStore } from '../stores/config.js';
+import { useConfigStore } from '../stores/config';
 export interface TagSuggestion {
     tag: string;
     isAlias: boolean;

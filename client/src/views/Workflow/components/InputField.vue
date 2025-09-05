@@ -16,6 +16,12 @@ const numberInfo = props.comfyInputInfo[1];
 
 const inputValue = ref<any>(props.appInputInfo.lastValue ?? props.defaultValue ?? props.comfyInputInfo[1].default ?? undefined);
 
+// Generate unique IDs for form accessibility
+const inputId = nanoid();
+const textInputId = `text-input-${inputId}`;
+const textareaId = `textarea-${inputId}`;
+const selectId = `select-${inputId}`;
+
 function getValue() {
     if (props.appInputInfo.features?.increment_toggles) {
         switch (props.appInputInfo.features.increment_toggles.mode) {
@@ -48,7 +54,7 @@ const showExtraMenu = ref(false);
         <div v-if="comfyInputInfo[0] === 'INT' || comfyInputInfo[0] === 'FLOAT'" class="flex flex-row gap-2">
             <input class="w-full outline-none" type="number" v-model="inputValue" :min="numberInfo.min ?? undefined"
                 :max="numberInfo.max ?? undefined" :step="numberInfo.step ?? undefined"
-                :title="numberInfo.tooltip ?? undefined" />
+                :title="numberInfo.tooltip ?? undefined" :id="textInputId" :name="textInputId" />
             <button v-if="appInputInfo.features" @click="showExtraMenu = !showExtraMenu"
                 class="rounded-sm pointer-coarse:scale-150" :class="{ 'bg-surface-light': showExtraMenu }">
                 <FaPlus class="box-border p-1 pointer-coarse:p-1.5" />
@@ -57,15 +63,15 @@ const showExtraMenu = ref(false);
 
         <template v-else-if="comfyInputInfo[0] === 'STRING'">
             <input type="text" v-if="!comfyInputInfo[1].multiline" v-model="inputValue"
-                :title="comfyInputInfo[1].tooltip ?? undefined" />
+                :title="comfyInputInfo[1].tooltip ?? undefined" :id="textInputId" :name="textInputId" />
 
             <textarea v-else-if="!appInputInfo.features?.tag_input" :title="comfyInputInfo[1].tooltip ?? undefined"
-                class="has-tag-autocomplete" v-model="inputValue">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>
+                class="has-tag-autocomplete" v-model="inputValue" :id="textareaId" :name="textareaId">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>
 
-            <TagInput v-else v-model="inputValue" :default="defaultValue ?? comfyInputInfo[1].default ?? ''"></TagInput>
+            <TagInput v-else v-model="inputValue" :default="defaultValue ?? comfyInputInfo[1].default ?? ''" :id="textareaId" :name="textareaId"></TagInput>
         </template>
 
-        <select v-else :title="comfyInputInfo[1].tooltip ?? undefined" v-model="inputValue">
+        <select v-else :title="comfyInputInfo[1].tooltip ?? undefined" v-model="inputValue" :id="selectId" :name="selectId">
             <option v-for="item in comfyInputInfo[0]" :key="item" :value="item">{{ item }}</option>
         </select>
         <div v-if="appInputInfo.features?.increment_toggles && showExtraMenu"

@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router';
 import WorkflowInput from './components/WorkflowInput.vue';
 import useComfyStore from '../../stores/comfyui';
 import { FaEdit, FaHistory, FaPlay, FaStop } from 'vue-icons-plus/fa';
+import { promptAutocompleteManager } from '../../lib/promptAutocompleteManager';
 
 const comfyuiStore = useComfyStore();
 const appWorkflowsStore = useAppWorkflowsStore();
@@ -54,11 +55,23 @@ onMounted(() => {
 onMounted(async () => {
     // Wait for DOM to render inputs
     await nextTick();
-    // Note: Tag autocomplete functionality removed for now
-    // const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
-    // textareas.forEach((el) => {
-    //     // Autocomplete attachment would go here
-    // });
+    // Setup tag autocomplete for textareas
+    const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    textareas.forEach((textarea) => {
+        const inputElement = textarea as HTMLTextAreaElement;
+        // Get the input title from the parent component or closest label
+        const inputTitle = inputElement.getAttribute('title') || inputElement.placeholder || 'text';
+        promptAutocompleteManager.attachToTextarea(inputElement, inputTitle);
+    });
+    
+    // Setup tag autocomplete for inputs
+    const inputs = document.querySelectorAll('input.has-tag-autocomplete');
+    inputs.forEach((input) => {
+        const inputElement = input as HTMLInputElement;
+        // Get the input title from the parent component or closest label
+        const inputTitle = inputElement.getAttribute('title') || inputElement.placeholder || 'text';
+        promptAutocompleteManager.attachToInput(inputElement, inputTitle);
+    });
 });
 
 async function generate() {

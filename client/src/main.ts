@@ -6,6 +6,8 @@ import App from './App.vue';
 import { createPinia } from 'pinia';
 import router from './lib/router';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+// Import and initialize prompt autocomplete manager
+import './lib/promptAutocompleteManager';
 
 const app = createApp(App);
 
