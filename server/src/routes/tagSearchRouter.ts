@@ -1,4 +1,5 @@
 import express from 'express';
+import { z } from 'zod';
 import { tagSearcher } from '../utils/tagSearchUtils';
 
 const router = express.Router();
@@ -9,21 +10,31 @@ const router = express.Router();
  */
 router.get('/search', async (req, res): Promise<void> => {
     try {
-        const query = req.query.q as string;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const querySchema = z.object({
+            q: z.string().min(1),
+            limit: z
+                .string()
+                .transform((val) => parseInt(val, 10))
+                .pipe(z.number().int().min(1).max(20))
+                .optional(),
+            underscores: z.string().optional(),
+        });
 
-        if (!query) {
-            res.status(400).json({ error: 'Query parameter "q" is required' });
+        const parsed = querySchema.safeParse(req.query);
+        if (!parsed.success) {
+            res.status(400).json({ error: parsed.error.message });
             return;
         }
 
-        if (query.length < 2) {
+        const { q, limit = 10, underscores } = parsed.data;
+
+        if (q.length < 2) {
             res.json({ results: [] });
             return;
         }
 
-        const useUnderscores = req.query.underscores !== 'false'; // Default to true
-        const results = await tagSearcher.searchTags(query, Math.min(limit, 20)); // Cap at 20 results
+        const useUnderscores = underscores !== 'false'; // Default to true
+        const results = await tagSearcher.searchTags(q, limit);
         
         // Apply underscore setting to results
         const processedResults = results.map(result => ({
@@ -34,7 +45,7 @@ router.get('/search', async (req, res): Promise<void> => {
         
         res.json({ 
             results: processedResults,
-            query,
+            query: q,
             count: processedResults.length
         });
 
