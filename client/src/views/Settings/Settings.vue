@@ -6,9 +6,11 @@ import SelectionSetting from './components/SelectionSetting.vue';
 import ConnectionStatus from './components/ConnectionStatus.vue';
 import CorsHelp from './components/CorsHelp.vue';
 import { ref, watch, computed, onMounted } from 'vue';
+import { useVersion } from '../../composables/useVersion';
 
 const config = useConfigStore();
 const isTesting = ref(false);
+const { version, loading: versionLoading, error: versionError } = useVersion();
 
 // Watch for changes to base URL and trigger debounced test
 watch(() => config.comfyUi.urlConfig.base, (newValue, oldValue) => {
@@ -58,6 +60,20 @@ const testBaseConnection = async () => {
     await config.testConnection('base');
 };
 
+// Comprehensive connection test function
+const testComprehensiveConnection = async () => {
+    const type = config.comfyUi.urlConfig.custom ? 'custom' : 'base';
+    const result = await config.testConnectionComprehensive(type);
+    
+    console.log('[CONNECTION] Comprehensive test results:', result);
+    
+    if (!result.success) {
+        console.warn('[CONNECTION] Connection issues detected:', result.errors);
+    }
+    
+    return result;
+};
+
 const debugDumpConfig = () => {
     console.group('[DEBUG] Configuration Dump');
     console.log('Full config state:', JSON.stringify(config.$state, null, 2));
@@ -72,14 +88,8 @@ const debugDumpConfig = () => {
 onMounted(async () => {
     await config.loadDebugConfig();
     
-    // Trigger initial connection test for the current configuration
-    if (!config.comfyUi.urlConfig.custom) {
-        // For base URL configuration, test the base connection
-        await config.testConnection('base');
-    } else {
-        // For custom URL configuration, test the custom connection
-        await config.testConnection('custom');
-    }
+    // Trigger comprehensive connection test for the current configuration
+    await testComprehensiveConnection();
 });
 </script>
 
@@ -151,13 +161,49 @@ onMounted(async () => {
                 v-model="config.ui.transitionSpeedMs"
                 @update:model-value="config.loadTransitionSpeed()"
              />
-<<<<<<< HEAD
             <h2 class="text-2xl font-semibold">Autocomplete</h2>
             <CheckboxSetting 
                 label="Use underscores in tags" 
                 description="When enabled, tags use underscores (e.g. 'long_hair'). When disabled, spaces are used (e.g. 'long hair')."
                 v-model="config.autocomplete.tagAutocomplete.useUnderscores" 
             />
+            
+            <!-- Version Information -->
+            <h2 class="text-2xl font-semibold">Version Information</h2>
+            <div class="bg-bg-light p-4 rounded-lg">
+                <div v-if="versionLoading" class="text-text-muted">Loading version information...</div>
+                <div v-else-if="versionError" class="text-red-500">
+                    Failed to load version: {{ versionError }}
+                </div>
+                <div v-else-if="version" class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-semibold">{{ version.app }}</span>
+                        <span class="px-3 py-1 bg-primary/20 text-primary text-sm rounded-full font-mono">
+                            v{{ version.version }}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-text-muted">
+                        <div>
+                            <span class="font-medium">Build:</span> 
+                            <span class="font-mono">{{ version.buildNumber }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Commit:</span> 
+                            <span class="font-mono">{{ version.commit }}</span>
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                            <span class="font-medium">Built:</span> 
+                            <span class="font-mono">{{ new Date(version.timestamp).toLocaleString() }}</span>
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                            <span class="font-medium">Full Version:</span> 
+                            <span class="font-mono text-xs">{{ version.fullVersion }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-text-muted">No version information available</div>
+            </div>
             
             <!-- Debug Section (Server Controlled) -->
             <div v-if="config.debug.enabled" class="flex flex-col gap-2">
@@ -186,6 +232,13 @@ onMounted(async () => {
                             class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
                         >
                             Test Base Connection
+                        </button>
+                        
+                        <button 
+                            @click="testComprehensiveConnection"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                            Test Both HTTP & WebSocket
                         </button>
                         
                         <button 

@@ -8,20 +8,20 @@ export interface AutocompleteItem {
 export class AutocompleteComponent {
     private container: HTMLElement;
     private dropdown: HTMLElement;
-    private textarea: HTMLTextAreaElement;
+    private inputElement: HTMLTextAreaElement | HTMLInputElement;
     private isVisible = false;
     private selectedIndex = -1;
     private suggestions: AutocompleteItem[] = [];
     private currentWord = '';
 
-    constructor(textarea: HTMLTextAreaElement) {
-        this.textarea = textarea;
+    constructor(inputElement: HTMLTextAreaElement | HTMLInputElement) {
+        this.inputElement = inputElement;
         this.container = this.createContainer();
         this.dropdown = this.createDropdown();
         this.container.appendChild(this.dropdown);
         
-        // Insert container as sibling to textarea within the inner-input-wrapper
-        const innerWrapper = textarea.parentNode;
+        // Insert container as sibling to input element within the inner-input-wrapper
+        const innerWrapper = inputElement.parentNode;
         if (innerWrapper) {
             innerWrapper.appendChild(this.container);
             // Make the inner wrapper relatively positioned for absolute positioning of dropdown
@@ -44,16 +44,16 @@ export class AutocompleteComponent {
     }
 
     private attachEventListeners(): void {
-        this.textarea.addEventListener('input', () => this.handleInput());
-        this.textarea.addEventListener('keydown', (e) => this.handleKeydown(e));
-        this.textarea.addEventListener('blur', () => {
+        this.inputElement.addEventListener('input', () => this.handleInput());
+        this.inputElement.addEventListener('keydown', (e) => this.handleKeydown(e as KeyboardEvent));
+        this.inputElement.addEventListener('blur', () => {
             // Delay hiding to allow for clicks on dropdown items
             setTimeout(() => this.hide(), 150);
         });
         
         // Handle clicks on dropdown items
         this.dropdown.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // Prevent textarea blur
+            e.preventDefault(); // Prevent input blur
             e.stopPropagation(); // Prevent click from going through to elements behind
             const item = (e.target as HTMLElement).closest('.autocomplete-item');
             if (item) {
@@ -114,8 +114,8 @@ export class AutocompleteComponent {
     }
 
     private handleInput(): void {
-        const cursorPos = this.textarea.selectionStart || 0;
-        const text = this.textarea.value;
+        const cursorPos = this.inputElement.selectionStart || 0;
+        const text = this.inputElement.value;
         
         // Find the current word being typed (tag between commas)
         const beforeCursor = text.substring(0, cursorPos);
@@ -239,8 +239,8 @@ export class AutocompleteComponent {
         if (index < 0 || index >= this.suggestions.length) return;
         
         const selectedSuggestion = this.suggestions[index];
-        const text = this.textarea.value;
-        const cursorPos = this.textarea.selectionStart || 0;
+        const text = this.inputElement.value;
+        const cursorPos = this.inputElement.selectionStart || 0;
         
         // Find the current tag boundaries (comma-separated)
         const beforeCursor = text.substring(0, cursorPos);
@@ -263,11 +263,11 @@ export class AutocompleteComponent {
                        selectedSuggestion.text + ',' +
                        remainingText;
         
-        this.textarea.value = newText;
+        this.inputElement.value = newText;
         
         // Position cursor after the inserted tag and comma
         const newCursorPos = wordStart + selectedSuggestion.text.length + 1;
-        this.textarea.setSelectionRange(newCursorPos, newCursorPos);
+        this.inputElement.setSelectionRange(newCursorPos, newCursorPos);
         
         // Clear the suggestions and hide dropdown
         this.suggestions = [];
@@ -275,7 +275,7 @@ export class AutocompleteComponent {
         this.hide();
         
         setTimeout(() => {
-            this.textarea.dispatchEvent(new Event('input', { bubbles: false }));
+            this.inputElement.dispatchEvent(new Event('input', { bubbles: false }));
         }, 0);
     }
 

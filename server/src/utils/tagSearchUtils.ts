@@ -11,15 +11,32 @@ export interface TagSuggestion {
 }
 
 class TagSearcher {
-    private tagsFilePath: string;
+    private tagsFilePath: string = '';
     private isFileChecked = false;
     private fileExists = false;
 
     constructor() {
-        // Since we're running from server directory, go up one level to project root
-        const projectRoot = path.resolve(process.cwd(), '..');
-        this.tagsFilePath = path.join(projectRoot, 'shared', 'config', 'tags.csv');
+        // Find the tags file path - check multiple possible locations
+        const possiblePaths = [
+            path.join(process.cwd(), 'config', 'tags.csv'),     // From project root
+            path.join(process.cwd(), '..', 'config', 'tags.csv'), // From server subdirectory
+            path.join(__dirname, '..', '..', '..', 'config', 'tags.csv'), // From dist folder
+        ];
+        
+        for (const possiblePath of possiblePaths) {
+            if (fs.existsSync(possiblePath)) {
+                this.tagsFilePath = possiblePath;
+                break;
+            }
+        }
+        
+        // Default to the most likely path if none found
+        if (!this.tagsFilePath) {
+            this.tagsFilePath = path.join(process.cwd(), 'config', 'tags.csv');
+        }
+        
         console.log('Looking for tags file at:', this.tagsFilePath);
+        console.log('File exists:', fs.existsSync(this.tagsFilePath));
     }
 
     /**

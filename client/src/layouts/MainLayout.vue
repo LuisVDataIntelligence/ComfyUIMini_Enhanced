@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
 import emitter from '../lib/mitt';
 import { FiMenu } from 'vue-icons-plus/fi';
+import version from '../version';
 
 const sidebarOpened = ref(false);
 
@@ -40,7 +42,7 @@ onBeforeUnmount(() => {
             <RouterLink to="/">
                 <img src="/icons/favicon-256x256.png" alt="Home" class="size-9 hover:scale-95 active:scale-90 transition-all duration-dynamic"></img>
             </RouterLink>
-            <span>v2.0.0</span>
+            <span>v{{ version.number }}</span>
         </header>
         <main class="px-2 md:mt-2">
             <RouterView></RouterView>

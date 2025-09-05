@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { ComfyUIPromptSchema } from '../schemas/comfyui.js';
+import { createBunWebSocket } from 'hono/bun';
 
+const { upgradeWebSocket, websocket } = createBunWebSocket();
 const router = new Hono();
 
 // Enable CORS for ComfyUI proxy routes
@@ -29,7 +32,20 @@ router.get('/object_info', async (c) => {
 // Proxy ComfyUI prompt endpoint
 router.post('/prompt', async (c) => {
   try {
-    const body = await c.req.json();
+    const rawBody = await c.req.json();
+    
+    // Validate request payload with Zod schema
+    const validationResult = ComfyUIPromptSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      console.error('Invalid ComfyUI prompt payload:', validationResult.error.format());
+      return c.json({
+        error: 'Invalid prompt payload',
+        details: 'Request does not match expected schema',
+        validation_errors: validationResult.error.format(),
+      }, 400);
+    }
+    
+    const body = validationResult.data;
     const comfyuiUrl = getComfyUIUrl();
     const response = await fetch(`${comfyuiUrl}/prompt`, {
       method: 'POST',
@@ -120,4 +136,108 @@ router.get('/view', async (c) => {
   }
 });
 
+// Clear history endpoint
+router.post('/history/clear', async (c) => {
+  try {
+    const comfyuiUrl = getComfyUIUrl();
+    const response = await fetch(`${comfyuiUrl}/history/clear`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) throw new Error(`ComfyUI responded with ${response.status}`);
+    
+    const data = await response.json();
+    return c.json(data);
+  } catch (error) {
+    console.error('Error clearing ComfyUI history:', error);
+    return c.json({
+      error: 'Failed to clear ComfyUI history',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, 500);
+  }
+});
+
+// WebSocket proxy for ComfyUI (must be BEFORE generic route)
+router.get('/ws', upgradeWebSocket((c) => {
+  const comfyuiUrl = getComfyUIUrl();
+  const comfyuiWsUrl = comfyuiUrl.replace(/^http/, 'ws') + '/ws';
+  let comfySocket: WebSocket | null = null;
+  
+  return {
+    onOpen: (evt, ws) => {
+      console.log('Client WebSocket connected, establishing connection to ComfyUI...');
+      
+      // Connect to ComfyUI WebSocket
+      comfySocket = new WebSocket(comfyuiWsUrl);
+      
+      comfySocket.onopen = () => {
+        console.log('Connected to ComfyUI WebSocket');
+      };
+      
+      comfySocket.onmessage = (event) => {
+        // Forward messages from ComfyUI to client
+        ws.send(event.data);
+      };
+      
+      comfySocket.onclose = (event) => {
+        console.log('ComfyUI WebSocket disconnected:', event.code, event.reason);
+        ws.close(event.code, event.reason);
+      };
+      
+      comfySocket.onerror = (error) => {
+        console.error('ComfyUI WebSocket error:', error);
+        ws.close(1011, 'ComfyUI connection error');
+      };
+    },
+    
+    onMessage: (evt, ws) => {
+      // Forward messages from client to ComfyUI
+      if (comfySocket && comfySocket.readyState === WebSocket.OPEN) {
+        comfySocket.send(evt.data);
+      }
+    },
+    
+    onClose: (evt, ws) => {
+      console.log('Client WebSocket disconnected');
+      if (comfySocket) {
+        comfySocket.close();
+        comfySocket = null;
+      }
+    },
+    
+    onError: (evt, ws) => {
+      console.error('WebSocket proxy error:', evt);
+      if (comfySocket) {
+        comfySocket.close();
+        comfySocket = null;
+      }
+    }
+  };
+}));
+
+// Generic GET proxy for other ComfyUI endpoints (excluding WebSocket)
+router.get('/*', async (c) => {
+  const path = c.req.path.replace('/api/comfyui', '');
+  
+  // Skip WebSocket route - it has its own handler
+  if (path === '/ws') {
+    return c.text('WebSocket endpoint - use WebSocket protocol', 400);
+  }
+  
+  try {
+    const comfyuiUrl = getComfyUIUrl();
+    const response = await fetch(`${comfyuiUrl}${path}?${c.req.url.split('?')[1] || ''}`);
+    if (!response.ok) throw new Error(`ComfyUI responded with ${response.status}`);
+    const data = await response.json();
+    return c.json(data);
+  } catch (error) {
+    console.error(`Error proxying ComfyUI ${path}:`, error);
+    return c.json({
+      error: `Failed to fetch ComfyUI ${path}`,
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, 500);
+  }
+});
+
 export default router;
+export { websocket };

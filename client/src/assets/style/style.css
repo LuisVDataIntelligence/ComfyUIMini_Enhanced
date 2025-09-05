@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import './fonts.css';
 
 @theme {
     --color-bg-dark: oklch(0.1 0.005 315);
@@ -29,7 +28,7 @@
 }
 
 :root {
-    font-family: 'NebulaSans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.5;
     font-weight: 400;
 

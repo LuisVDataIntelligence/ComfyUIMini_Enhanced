@@ -11,11 +11,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Server (Bun Backend)
 - `cd server && bun start` - Start production server
-- `cd server && bun run index.ts` - Start development server
+- `cd server && bun run index.ts` - Start development server with default settings
+- `cd server && bun run index.ts --host 0.0.0.0 --debug` - Start with LAN access and debug mode
+- `cd server && tsc --noEmit` - TypeScript type checking without compilation
 
 ### Root Commands
 - `bun dev` - Start client development server (from root)
 - `bun start` - Start production server (from root)
+- `./runcomfyuimini.sh` - Start server with environment configuration from .env file
+
+### Environment Configuration
+Create `.env` file in root for server configuration:
+```
+HOST=0.0.0.0          # Use 0.0.0.0 for LAN access, localhost for local only
+PORT=1811             # Server port
+DEBUG=true            # Enable debug mode
+DEBUG_CONNECTION=true # Enable connection debugging
+FORCE_BUILD=false     # Force rebuild of client
+BUILD_PATH=./build    # Path to built client files
+```
 
 ## Architecture Overview
 
@@ -40,11 +54,12 @@ This is a monorepo with client-server architecture for ComfyUI Mini, a mobile-fr
 
 ### Server Architecture
 - **Routes**: 
-  - `/api/comfyui/*` - Proxy to ComfyUI backend
+  - `/api/comfyui/*` - Proxy to ComfyUI backend with Zod schema validation
   - `/api/tags/*` - Tag search and autocomplete
   - `/api/debug/*` - Debug utilities
 - **Static Serving**: Client build files served from configurable build path
 - **CLI Args**: Configurable host, port, build path, and force build options
+- **Validation**: Zod schemas for API request validation (see `server/src/schemas/`)
 
 ### Client Architecture
 - **Views**: Home, Import, Generate, Workflow, Settings, History
@@ -61,10 +76,22 @@ This is a monorepo with client-server architecture for ComfyUI Mini, a mobile-fr
 - `client/src/lib/router.ts` - Vue Router configuration
 - `client/src/stores/comfyui.ts` - ComfyUI integration
 - `client/src/lib/tagAutocomplete.ts` - Tag autocomplete logic
+- `client/src/styles/autocomplete.css` - Autocomplete component styles
+- `server/src/routes/comfyuiRouter.ts` - ComfyUI API proxy with validation
 - `server/src/routes/tagSearchRouter.ts` - Tag search API
+- `server/src/schemas/comfyui.ts` - Zod validation schemas
 
 ### Development Notes
 - Uses workspaces configuration for monorepo management
 - Server automatically builds client if needed on startup
 - Tag autocomplete requires `config/tags.csv` file with booru-style tag data
 - Client uses server proxy to avoid ComfyUI CORS issues
+- All CSS variables use consistent design tokens (see `client/src/assets/style/style.css`)
+- API requests validated using Zod schemas for type safety and security
+
+### Recent Improvements
+- **Code Cleanup**: Removed duplicate CSS files and large diff files to reduce repository size
+- **CSS Consistency**: Fixed all undefined CSS variables to use proper design tokens
+- **API Validation**: Added comprehensive Zod schema validation for ComfyUI API endpoints
+- **Documentation**: Enhanced with environment configuration and validation architecture details
+- memorize after making changes, shutdown the server, rebuild necessary functions, increment version, and test relevant code changes before calling code "complete"

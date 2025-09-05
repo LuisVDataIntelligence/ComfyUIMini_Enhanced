@@ -39,11 +39,11 @@ export const useConfigStore = defineStore('config', {
     state: (): Config => ({
         comfyUi: {
             urlConfig: {
-                base: `${window.location.hostname}:49170`,
-                secure: false,
+                base: `${window.location.hostname}:1811`, // Default to same host, port 1811
+                secure: window.location.protocol === 'https:', // Auto-detect HTTPS
                 custom: false,
-                customUrl: `http://${window.location.hostname}:8188`,
-                customWs: `ws://${window.location.hostname}:8188/ws`
+                customUrl: `${window.location.protocol}//${window.location.hostname}:8188`,
+                customWs: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:8188/ws`
             },
             connectionStatus: {
                 base: 'idle',
@@ -197,6 +197,145 @@ export const useConfigStore = defineStore('config', {
                 
                 this.comfyUi.connectionStatus.lastTested = Date.now();
                 return false;
+            }
+        },
+
+        // Enhanced connection test that validates both HTTP and WebSocket
+        async testConnectionComprehensive(type: 'base' | 'custom'): Promise<{success: boolean, httpResult: boolean, wsResult: boolean, errors: string[]}> {
+            console.log(`[CONNECTION] Starting comprehensive connection test for type: ${type}`);
+            
+            // Set testing status
+            this.comfyUi.connectionStatus[type] = 'testing';
+            this.comfyUi.connectionStatus.lastError = null;
+            
+            const errors: string[] = [];
+            let httpResult = false;
+            let wsResult = false;
+            
+            try {
+                let httpUrl: string;
+                let wsUrl: string;
+                
+                if (type === 'base') {
+                    httpUrl = this.comfyUiUrl;
+                    wsUrl = this.comfyUiWs;
+                } else {
+                    httpUrl = this.comfyUi.urlConfig.customUrl;
+                    wsUrl = this.comfyUi.urlConfig.customWs;
+                }
+                
+                if (this.debug.enabled && this.debug.showConnectionLogs) {
+                    console.log(`[DEBUG] Testing HTTP: ${httpUrl}`);
+                    console.log(`[DEBUG] Testing WebSocket: ${wsUrl}`);
+                }
+                
+                // Test HTTP connection
+                try {
+                    const httpFetch = fetch('/api/debug/test-connection', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: httpUrl })
+                    });
+                    
+                    const httpTimeout = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('HTTP timeout (10s)')), 10000);
+                    });
+                    
+                    const httpResponse = await Promise.race([httpFetch, httpTimeout]) as Response;
+                    
+                    if (httpResponse.ok) {
+                        const result = await httpResponse.json();
+                        if (result.success) {
+                            httpResult = true;
+                        } else {
+                            errors.push(`HTTP: ${result.error || 'Connection failed'}`);
+                        }
+                    } else {
+                        errors.push(`HTTP: Server proxy error ${httpResponse.status}`);
+                    }
+                } catch (error) {
+                    httpResult = false;
+                    errors.push(`HTTP: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                }
+                
+                // Test WebSocket connection
+                try {
+                    const wsTest = new Promise<boolean>((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            reject(new Error('WebSocket timeout (5s)'));
+                        }, 5000);
+                        
+                        // Use our server WebSocket proxy for testing
+                        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                        const testWsUrl = `${wsProtocol}//${window.location.host}/api/comfyui/ws?clientId=test-${Date.now()}`;
+                        
+                        const ws = new WebSocket(testWsUrl);
+                        
+                        ws.onopen = () => {
+                            clearTimeout(timeout);
+                            ws.close();
+                            resolve(true);
+                        };
+                        
+                        ws.onerror = () => {
+                            clearTimeout(timeout);
+                            reject(new Error('WebSocket connection failed'));
+                        };
+                        
+                        ws.onclose = (event) => {
+                            if (event.code !== 1000) { // 1000 = normal closure
+                                clearTimeout(timeout);
+                                reject(new Error(`WebSocket closed with code ${event.code}`));
+                            }
+                        };
+                    });
+                    
+                    wsResult = await wsTest;
+                } catch (error) {
+                    wsResult = false;
+                    errors.push(`WebSocket: ${error instanceof Error ? error.message : 'Connection failed'}`);
+                }
+                
+                // Update connection status based on results
+                const success = httpResult && wsResult;
+                
+                if (success) {
+                    this.comfyUi.connectionStatus[type] = 'connected';
+                    this.comfyUi.connectionStatus.lastError = null;
+                } else {
+                    this.comfyUi.connectionStatus[type] = 'failed';
+                    if (errors.length > 0) {
+                        this.comfyUi.connectionStatus.lastError = errors.join('; ');
+                    } else {
+                        this.comfyUi.connectionStatus.lastError = 'Connection validation failed';
+                    }
+                }
+                
+                this.comfyUi.connectionStatus.lastTested = Date.now();
+                
+                if (this.debug.enabled && this.debug.showConnectionLogs) {
+                    console.log(`[DEBUG] Connection test results:`, { 
+                        success, 
+                        httpResult, 
+                        wsResult, 
+                        errors 
+                    });
+                }
+                
+                return { success, httpResult, wsResult, errors };
+                
+            } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : 'Unknown error during comprehensive test';
+                this.comfyUi.connectionStatus[type] = 'failed';
+                this.comfyUi.connectionStatus.lastError = errorMsg;
+                this.comfyUi.connectionStatus.lastTested = Date.now();
+                
+                return { 
+                    success: false, 
+                    httpResult: false, 
+                    wsResult: false, 
+                    errors: [errorMsg] 
+                };
             }
         },
         

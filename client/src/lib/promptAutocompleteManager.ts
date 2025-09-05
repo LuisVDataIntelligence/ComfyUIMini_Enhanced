@@ -1,8 +1,8 @@
-import { AutocompleteComponent, type AutocompleteItem } from '../components/AutocompleteComponent.js';
-import { tagAutocomplete } from './tagAutocomplete.js';
+import { AutocompleteComponent, type AutocompleteItem } from '../components/AutocompleteComponent';
+import { tagAutocomplete } from './tagAutocomplete';
 
 export class PromptAutocompleteManager {
-    private components = new Map<HTMLTextAreaElement, AutocompleteComponent>();
+    private components = new Map<HTMLTextAreaElement | HTMLInputElement, AutocompleteComponent>();
 
     constructor() {
         this.setupEventListeners();
@@ -19,6 +19,17 @@ export class PromptAutocompleteManager {
     }
 
     /**
+     * Attaches autocomplete to an input if it's a prompt input
+     */
+    public attachToInput(input: HTMLInputElement, title: string): void {
+        if (this.isPromptInput(title)) {
+            // Cast input to textarea for compatibility with AutocompleteComponent
+            const component = new AutocompleteComponent(input as any as HTMLTextAreaElement);
+            this.components.set(input, component);
+        }
+    }
+
+    /**
      * Removes autocomplete from a textarea
      */
     public detachFromTextarea(textarea: HTMLTextAreaElement): void {
@@ -26,6 +37,17 @@ export class PromptAutocompleteManager {
         if (component) {
             component.destroy();
             this.components.delete(textarea);
+        }
+    }
+
+    /**
+     * Removes autocomplete from an input
+     */
+    public detachFromInput(input: HTMLInputElement): void {
+        const component = this.components.get(input);
+        if (component) {
+            component.destroy();
+            this.components.delete(input);
         }
     }
 

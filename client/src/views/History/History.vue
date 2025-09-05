@@ -7,6 +7,12 @@ const comfyuiStore = useComfyStore();
 
 const metadataHidden = ref(true);
 
+const clearHistory = async () => {
+    if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+        await comfyuiStore.clearHistory();
+    }
+};
+
 onMounted(() => {
     comfyuiStore.loadFullHistory();
 });
@@ -30,6 +36,11 @@ const historyReversed = computed(() => {
         <div class="w-full bg-surface p-4 rounded-xl text-center cursor-pointer"
             @click="metadataHidden = !metadataHidden">
             {{ metadataHidden ? 'Show' : 'Hide' }} metadata
+        </div>
+        
+        <div class="w-full bg-red-600 hover:bg-red-700 transition-colors text-white p-4 rounded-xl text-center cursor-pointer"
+            @click="clearHistory">
+            Clear All History
         </div>
 
         <div class="flex flex-col gap-2">

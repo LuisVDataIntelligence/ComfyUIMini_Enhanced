@@ -25,3 +25,15 @@ dist-ssr
 
 .env
 server/build/
+
+# HTTPS certificates (never commit private keys!)
+certs/
+*.pem
+*.key
+*.crt
+
+# Claude Code project files
+CLAUDE.md
+
+# ComfyUI tags files
+shared/config/tags.csv

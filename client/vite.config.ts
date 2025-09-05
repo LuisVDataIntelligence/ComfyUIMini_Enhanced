@@ -9,7 +9,14 @@ export default defineConfig({
         tailwindcss()
     ],
     server: {
-        port: 1811
+        port: 5173, // Use different port from server
+        proxy: {
+            '/api': {
+                target: 'https://localhost:1811',
+                changeOrigin: true,
+                secure: false // Accept self-signed certificates
+            }
+        }
     },
     build: {
         outDir: '../server/build',
