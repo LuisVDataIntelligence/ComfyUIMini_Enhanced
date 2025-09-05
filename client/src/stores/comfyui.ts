@@ -129,7 +129,12 @@ const useComfyStore = defineStore('comfyui', () => {
 
                         for (const node of Object.values(outputs)) {
                             node.images.map((imageData) => {
-                                finalImageUrls.push(`${comfyuiUrl.value}/api/view?filename=${imageData.filename}&subfolder=${imageData.subfolder}&type=${imageData.type}`)
+                                const params = new URLSearchParams({
+                                    filename: imageData.filename,
+                                    subfolder: imageData.subfolder,
+                                    type: imageData.type,
+                                });
+                                finalImageUrls.push(`/api/comfyui/view?${params.toString()}`);
                             });
                         }
 
@@ -166,21 +171,21 @@ const useComfyStore = defineStore('comfyui', () => {
     }
 
     async function refreshQueue() {
-        const response = await fetch(`${comfyuiUrl.value}/queue`);
+        const response = await fetch(`/api/comfyui/queue`);
         const queue: QueueResponse = await response.json();
 
         comfyQueue.value = queue;
     }
 
     async function loadFullHistory() {
-        const response = await fetch(`${comfyuiUrl.value}/history`);
+        const response = await fetch(`/api/comfyui/history`);
         const history: HistoryResponse = await response.json();
 
         comfyHistory.value = history;
     }
 
     async function stopGeneration() {
-        await fetch(`${comfyuiUrl.value}/interrupt`, {
+        await fetch(`/api/comfyui/interrupt`, {
             method: 'POST',
         });
 

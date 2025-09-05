@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import './assets/style/style.css';
 import './assets/style/fonts.css';
-import './assets/style/autocomplete.css';
+import './styles/autocomplete.css';
 import App from './App.vue';
 import { createPinia } from 'pinia';
 import router from './lib/router';
