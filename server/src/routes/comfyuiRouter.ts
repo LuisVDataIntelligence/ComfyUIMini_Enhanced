@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { ComfyUIPromptSchema } from '../schemas/comfyui.js';
 
 const router = new Hono();
 
@@ -29,7 +30,20 @@ router.get('/object_info', async (c) => {
 // Proxy ComfyUI prompt endpoint
 router.post('/prompt', async (c) => {
   try {
-    const body = await c.req.json();
+    const rawBody = await c.req.json();
+    
+    // Validate request payload with Zod schema
+    const validationResult = ComfyUIPromptSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      console.error('Invalid ComfyUI prompt payload:', validationResult.error.format());
+      return c.json({
+        error: 'Invalid prompt payload',
+        details: 'Request does not match expected schema',
+        validation_errors: validationResult.error.format(),
+      }, 400);
+    }
+    
+    const body = validationResult.data;
     const comfyuiUrl = getComfyUIUrl();
     const response = await fetch(`${comfyuiUrl}/prompt`, {
       method: 'POST',
