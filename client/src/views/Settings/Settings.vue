@@ -206,13 +206,6 @@ onMounted(async () => {
                     <div class="text-xs text-yellow-700 mt-2">
                         Open browser DevTools (F12) to see debug logs in the Console tab.
                     </div>
-=======
-            <div class="mt-4">
-                <label class="text-text font-medium">Tag Autocomplete</label>
-                <div class="flex items-center gap-2 mt-2">
-                    <CheckboxSetting :label="'Use underscores in tag suggestions'" :model-value="useUnderscoresInTags"
-                        @update:model-value="toggleUseUnderscores" />
->>>>>>> origin/copilot/vscode1757024907303
                 </div>
             </div>
         </div>
