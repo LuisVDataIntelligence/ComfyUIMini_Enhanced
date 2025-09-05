@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, toRaw } from 'vue';
+import { onMounted, ref, toRaw, nextTick } from 'vue';
 import useAppWorkflowsStore from '../../stores/appWorkflows';
 import router from '../../lib/router';
 import { useRoute } from 'vue-router';
@@ -21,14 +21,44 @@ const inputElems = ref([]);
 const progressPercent = ref(0);
 const displayImageUrls = ref<string[]>([]);
 
-onBeforeMount(() => {
+const isInitialized = ref(false);
+
+onMounted(() => {
+    if (isInitialized.value) {
+        console.log('[WORKFLOW] Already initialized, skipping...');
+        return;
+    }
+    
+    console.log('[WORKFLOW] Component mounting...');
+    console.log('[WORKFLOW] Route params:', useRoute().params);
+    console.log('[WORKFLOW] Available workflows count:', appWorkflowsStore.appWorkflows.length);
+    console.log('[WORKFLOW] Available workflows:', appWorkflowsStore.appWorkflows);
+    
     const workflowIndex = parseInt(useRoute().params.index as string);
+    console.log('[WORKFLOW] Parsed workflow index:', workflowIndex);
+    
     if (workflowIndex >= appWorkflowsStore.appWorkflows.length || isNaN(workflowIndex)) {
+        console.log('[WORKFLOW] Invalid workflow index, redirecting to home');
         router.push('/');
+        return;
     }
 
     openedWorkflow.value = appWorkflowsStore.appWorkflows[workflowIndex];
+    console.log('[WORKFLOW] Opened workflow:', openedWorkflow.value);
     displayImageUrls.value = openedWorkflow.value.lastGeneratedImages ?? [];
+    
+    isInitialized.value = true;
+    console.log('[WORKFLOW] Initialization complete');
+});
+
+onMounted(async () => {
+    // Wait for DOM to render inputs
+    await nextTick();
+    // Note: Tag autocomplete functionality removed for now
+    // const textareas = document.querySelectorAll('textarea.has-tag-autocomplete');
+    // textareas.forEach((el) => {
+    //     // Autocomplete attachment would go here
+    // });
 });
 
 async function generate() {

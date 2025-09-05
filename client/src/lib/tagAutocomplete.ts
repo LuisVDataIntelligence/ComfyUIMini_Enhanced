@@ -1,3 +1,4 @@
+import { useConfigStore } from '../stores/config.js';
 export interface TagSuggestion {
     tag: string;
     isAlias: boolean;
@@ -34,8 +35,9 @@ export class TagAutocomplete {
         }
         
         try {
-            // Get underscore setting from localStorage (default to true)
-            const useUnderscores = localStorage.getItem('tagAutocomplete.useUnderscores') !== 'false';
+            // Get underscore setting from config store
+            const config = useConfigStore();
+            const useUnderscores = config.autocomplete.tagAutocomplete.useUnderscores;
             
             const response = await fetch(`/api/tags/search?q=${encodeURIComponent(input)}&limit=${maxResults}&underscores=${useUnderscores}`);
             

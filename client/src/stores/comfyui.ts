@@ -1,20 +1,23 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed, readonly } from "vue";
 import previewBlobToB64 from "../utils/generation/previewBlobToB64";
 import { tryCatch } from "../utils/tryCatch";
 import { useConfigStore } from "./config";
 
-async function initComfyData(comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
-    const response = await fetch(`${comfyuiUrl}/api/object_info`);
+async function initComfyData(_comfyuiUrl: string, objectInfo: ReturnType<typeof ref<ObjectInfoResponse | null>>) {
+    // Use server proxy instead of direct ComfyUI connection to avoid CORS issues
+    const response = await fetch('/api/comfyui/object_info');
     const data = await response.json();
 
     objectInfo.value = data;
 }
 
 const useComfyStore = defineStore('comfyui', () => {
-    // Todo: have one config variable
-    const comfyuiUrl = useConfigStore().comfyUiUrl;
-    const comfyuiWsUrl = useConfigStore().comfyUiWs;
+    const configStore = useConfigStore();
+    
+    // Use computed properties to ensure reactivity to config changes
+    const comfyuiUrl = computed(() => configStore.comfyUiUrl);
+    const comfyuiWsUrl = computed(() => configStore.comfyUiWs);
 
     const comfyObjectInfo = ref<ObjectInfoResponse | null>(null);
     const comfyQueue = ref<QueueResponse>({ queue_running: [], queue_pending: [] });
@@ -27,7 +30,7 @@ const useComfyStore = defineStore('comfyui', () => {
         if (comfyObjectInfo.value || loading.value) return;
         loading.value = true;
 
-        const { error } = await tryCatch(initComfyData(comfyuiUrl, comfyObjectInfo));
+        const { error } = await tryCatch(initComfyData(comfyuiUrl.value, comfyObjectInfo));
 
         loading.value = false;
         if (error) {
@@ -59,7 +62,7 @@ const useComfyStore = defineStore('comfyui', () => {
     }
 
     async function* generate(workflow: WorkflowNodes): AsyncGenerator<GeneratorYield, void, unknown> {
-        const socket = new WebSocket(comfyuiWsUrl + '?clientId=comfyuimini');
+        const socket = new WebSocket(comfyuiWsUrl.value + '?clientId=comfyuimini');
         let promptId: string | null = null;
 
         const messageQueue: GeneratorYield[] = [];
@@ -74,9 +77,12 @@ const useComfyStore = defineStore('comfyui', () => {
             setSocketOpen();
             console.log('Connected to ComfyUI websocket.');
 
-            // Send prompt
-            const response = await fetch(`${comfyuiUrl}/prompt`, {
+            // Send prompt via server proxy
+            const response = await fetch('/api/comfyui/prompt', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     prompt: workflow,
                     clientId: 'comfyuimini'
@@ -108,7 +114,7 @@ const useComfyStore = defineStore('comfyui', () => {
 
                     refreshQueue();
 
-                    const response = await fetch(`${comfyuiUrl}/history/${promptId}`);
+                    const response = await fetch(`/api/comfyui/history/${promptId}`);
                     const history: HistoryResponse = await response.json();
 
                     if (!promptId || Object.keys(history).length === 0) {
@@ -123,7 +129,7 @@ const useComfyStore = defineStore('comfyui', () => {
 
                         for (const node of Object.values(outputs)) {
                             node.images.map((imageData) => {
-                                finalImageUrls.push(`${comfyuiUrl}/api/view?filename=${imageData.filename}&subfolder=${imageData.subfolder}&type=${imageData.type}`)
+                                finalImageUrls.push(`${comfyuiUrl.value}/api/view?filename=${imageData.filename}&subfolder=${imageData.subfolder}&type=${imageData.type}`)
                             });
                         }
 
@@ -160,21 +166,21 @@ const useComfyStore = defineStore('comfyui', () => {
     }
 
     async function refreshQueue() {
-        const response = await fetch(`${comfyuiUrl}/queue`);
+        const response = await fetch(`${comfyuiUrl.value}/queue`);
         const queue: QueueResponse = await response.json();
 
         comfyQueue.value = queue;
     }
 
     async function loadFullHistory() {
-        const response = await fetch(`${comfyuiUrl}/history`);
+        const response = await fetch(`${comfyuiUrl.value}/history`);
         const history: HistoryResponse = await response.json();
 
         comfyHistory.value = history;
     }
 
     async function stopGeneration() {
-        await fetch(`${comfyuiUrl}/interrupt`, {
+        await fetch(`${comfyuiUrl.value}/interrupt`, {
             method: 'POST',
         });
 
@@ -184,10 +190,11 @@ const useComfyStore = defineStore('comfyui', () => {
     fetchComfyObjectInfo();
 
     return {
-        comfyuiUrl,
+        comfyuiUrl: readonly(comfyuiUrl),
         loading,
         queue: comfyQueue,
         history: comfyHistory,
+        objectInfo: comfyObjectInfo,
         loadFullHistory,
         stopGeneration,
         fetchComfyObjectInfo,

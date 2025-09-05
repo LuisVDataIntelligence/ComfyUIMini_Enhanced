@@ -4,6 +4,7 @@ const emit = defineEmits(['update:modelValue']);
 const props = defineProps<{
 	label: string;
 	modelValue: boolean;
+	description?: string;
 }>();
 
 const updateValue = () => {
@@ -15,7 +16,10 @@ const id = Math.random().toString(36).substring(2, 15);
 
 <template>
 	<label class="bg-bg p-2 rounded-lg flex flex-row justify-between items-center" @click="updateValue">
-        <label :for="id" class="cursor-pointer text-text">{{ label }}</label>
+        <div class="flex flex-col">
+            <label :for="id" class="cursor-pointer text-text">{{ label }}</label>
+            <p v-if="description" class="text-sm text-text-muted mt-1">{{ description }}</p>
+        </div>
         <input 
 			:id
             class="sr-only" 

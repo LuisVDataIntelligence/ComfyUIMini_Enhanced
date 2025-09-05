@@ -30,6 +30,21 @@ export function handleCliArgs() {
             description: 'The build path to host from.',
             default: './build'
         })
+        .option('debug', {
+            type: 'boolean',
+            description: 'Enable debug mode (development only)',
+            default: false
+        })
+        .option('debug-connection', {
+            type: 'boolean',
+            description: 'Enable connection debug logging',
+            default: false
+        })
+        .option('debug-config', {
+            type: 'boolean',
+            description: 'Enable configuration change logging',
+            default: false
+        })
         .check((argv) => {
             if (argv.port && isNaN(argv.port)) {
                 throw new Error('Port must be a number');
